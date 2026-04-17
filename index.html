@@ -1906,6 +1906,7 @@
                 <button class="tab active" data-tab="play">🎮 Jouer</button>
                 <button class="tab" data-tab="collection">📚 Collection</button>
                 <button class="tab" data-tab="badges">🏆 Badges</button>
+                <button class="tab" data-tab="scores">📊 Scores</button>
                 <button class="tab" data-tab="help">❓ Comment jouer</button>
             </div>
 
@@ -2126,7 +2127,70 @@
             </div>
 
             <!-- ========================================
-                 ONGLET 4 : COMMENT JOUER
+                 ONGLET 4 : SCORES
+            ======================================== -->
+            <div class="tab-content" id="scoresTab">
+                <div class="help-section">
+                    <h2 style="text-align: center; color: #00838F; margin-bottom: 30px;">📊 Mes Scores - Ne dépasse pas la limite !</h2>
+                    
+                    <!-- Facile -->
+                    <div style="background: linear-gradient(135deg, #E0F7FA, #B2EBF2); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #00838F; margin-bottom: 15px;">😊 Mode Facile</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">🏆 Meilleur Score</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #00838F;" id="bestScoreFacile">-</div>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">📈 Moyenne</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #00ACC1;" id="avgScoreFacile">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center; color: #00838F; font-weight: 600;" id="partiesFacile">0 parties jouées</div>
+                    </div>
+
+                    <!-- Difficile -->
+                    <div style="background: linear-gradient(135deg, #FFF3CD, #FFE69C); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #D97706; margin-bottom: 15px;">😰 Mode Difficile</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">🏆 Meilleur Score</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #D97706;" id="bestScoreDifficile">-</div>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">📈 Moyenne</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #F59E0B;" id="avgScoreDifficile">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center; color: #D97706; font-weight: 600;" id="partiesDifficile">0 parties jouées</div>
+                    </div>
+
+                    <!-- Enfer -->
+                    <div style="background: linear-gradient(135deg, #FEE2E2, #FCA5A5); padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #DC2626; margin-bottom: 15px;">🔥 Mode Enfer</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">🏆 Meilleur Score</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #DC2626;" id="bestScoreEnfer">-</div>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">📈 Moyenne</div>
+                                <div style="font-size: 2.5em; font-weight: bold; color: #EF4444;" id="avgScoreEnfer">-</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: center; color: #DC2626; font-weight: 600;" id="partiesEnfer">0 parties jouées</div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: #F3F4F6; border-radius: 12px;">
+                        <p style="color: #666; margin: 0;">
+                            💡 <strong>Astuce :</strong> Les scores à 0 sont comptés dans la moyenne... Fais attention à ne pas dépasser ! 😄
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 ONGLET 5 : COMMENT JOUER
             ======================================== -->
             <div class="tab-content" id="helpTab">
                 <div class="help-section">
@@ -2694,6 +2758,9 @@
             
             // Mettre à jour les badges
             updateBadgesDisplay();
+            
+            // Mettre à jour les scores de population
+            updateScoresDisplay();
         }
 
         function savePlayerData() {
@@ -2964,6 +3031,11 @@
                     // Activer l'onglet cliqué
                     tab.classList.add('active');
                     document.getElementById(`${targetTab}Tab`).classList.add('active');
+                    
+                    // Rafraîchir les scores si on ouvre l'onglet Scores
+                    if (targetTab === 'scores') {
+                        updateScoresDisplay();
+                    }
                 });
             });
         }
@@ -5468,6 +5540,8 @@ En mode ENFER, tu dois avoir au moins un pays de chaque continent :
 Continents manquants : ${geoCheck.missingContinents.join(', ')}
 
 ❌ Score : 0 points`);
+                    // Sauvegarder le score de 0
+                    savePopulationScore(0, 'enfer');
                     quitPopulationGame();
                     return;
                 }
@@ -5508,7 +5582,79 @@ Pays significatifs : ${score.paysSignificatifs}
    └─ Pénalité : ×${score.penalite}`);
             }
             
+            // Sauvegarder le score
+            savePopulationScore(score.scoreFinal, score.difficulty);
+            
             quitPopulationGame();
+        }
+
+        function savePopulationScore(scoreFinal, difficulty) {
+            if (!currentPlayer || !playerData[currentPlayer]) {
+                console.error('❌ Pas de joueur actif');
+                return;
+            }
+            
+            // Initialiser la structure des scores de population si elle n'existe pas
+            if (!playerData[currentPlayer].populationScores) {
+                playerData[currentPlayer].populationScores = {
+                    facile: [],
+                    difficile: [],
+                    enfer: []
+                };
+            }
+            
+            // Ajouter le score
+            playerData[currentPlayer].populationScores[difficulty].push(scoreFinal);
+            
+            // Sauvegarder dans localStorage
+            try {
+                localStorage.setItem('geoQuizPlayers', JSON.stringify(playerData));
+                console.log(`✅ Score sauvegardé: ${scoreFinal} points en mode ${difficulty}`);
+            } catch (error) {
+                console.error('❌ Erreur sauvegarde score:', error);
+            }
+            
+            // Mettre à jour l'affichage des scores
+            updateScoresDisplay();
+        }
+
+        function updateScoresDisplay() {
+            if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].populationScores) {
+                // Afficher des valeurs par défaut
+                ['facile', 'difficile', 'enfer'].forEach(diff => {
+                    const diffCapitalized = diff.charAt(0).toUpperCase() + diff.slice(1);
+                    document.getElementById(`bestScore${diffCapitalized}`).textContent = '-';
+                    document.getElementById(`avgScore${diffCapitalized}`).textContent = '-';
+                    document.getElementById(`parties${diffCapitalized}`).textContent = '0 parties jouées';
+                });
+                return;
+            }
+            
+            const scores = playerData[currentPlayer].populationScores;
+            
+            ['facile', 'difficile', 'enfer'].forEach(diff => {
+                const diffCapitalized = diff.charAt(0).toUpperCase() + diff.slice(1);
+                const scoresArray = scores[diff] || [];
+                
+                if (scoresArray.length === 0) {
+                    document.getElementById(`bestScore${diffCapitalized}`).textContent = '-';
+                    document.getElementById(`avgScore${diffCapitalized}`).textContent = '-';
+                    document.getElementById(`parties${diffCapitalized}`).textContent = '0 parties jouées';
+                } else {
+                    // Meilleur score
+                    const best = Math.max(...scoresArray);
+                    document.getElementById(`bestScore${diffCapitalized}`).textContent = best;
+                    
+                    // Moyenne
+                    const avg = Math.round(scoresArray.reduce((sum, s) => sum + s, 0) / scoresArray.length);
+                    document.getElementById(`avgScore${diffCapitalized}`).textContent = avg;
+                    
+                    // Nombre de parties
+                    const nbParties = scoresArray.length;
+                    document.getElementById(`parties${diffCapitalized}`).textContent = 
+                        `${nbParties} partie${nbParties > 1 ? 's' : ''} jouée${nbParties > 1 ? 's' : ''}`;
+                }
+            });
         }
 
         function quitPopulationGame() {
