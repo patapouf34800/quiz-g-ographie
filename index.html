@@ -2517,6 +2517,14 @@
                 revealed: true // Tout est révélé en mode abandon
             }));
 
+            // Fonction pour générer le texte selon le mode
+            const getCountryText = (country) => {
+                if (selectedMode === 'capitales' || selectedMode === 'expert') {
+                    return `${country.nom} = ${country.capitale}`;
+                }
+                return country.nom;
+            };
+
             // Si c'est le monde entier, grouper par continent
             if (selectedZone === 'monde') {
                 const continents = ['Afrique', 'Amérique', 'Asie', 'Europe', 'Océanie'];
@@ -2543,7 +2551,7 @@
                                              alt="${country.nom}" 
                                              class="flag-img"
                                              onerror="this.style.display='none'">
-                                        <span>${country.nom}</span>
+                                        <span>${getCountryText(country)}</span>
                                     </div>
                                 `;
                             } else {
@@ -2554,7 +2562,7 @@
                                              alt="${country.nom}" 
                                              class="flag-img"
                                              onerror="this.style.display='none'">
-                                        <span>${country.nom}</span>
+                                        <span>${getCountryText(country)}</span>
                                     </div>
                                 `;
                             }
@@ -2580,7 +2588,7 @@
                                      alt="${country.nom}" 
                                      class="flag-img"
                                      onerror="this.style.display='none'">
-                                <span>${country.nom}</span>
+                                <span>${getCountryText(country)}</span>
                             </div>
                         `;
                     } else {
@@ -2590,7 +2598,7 @@
                                      alt="${country.nom}" 
                                      class="flag-img"
                                      onerror="this.style.display='none'">
-                                <span>${country.nom}</span>
+                                <span>${getCountryText(country)}</span>
                             </div>
                         `;
                     }
