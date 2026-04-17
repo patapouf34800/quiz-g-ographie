@@ -131,7 +131,7 @@
   },
   {
     "nom": "Arménie",
-    "continent": "Asie",
+    "continent": "Europe",
     "capitale": "Erevan",
     "iso2": "AM",
     "flag": "am.png",
@@ -170,7 +170,7 @@
   },
   {
     "nom": "Azerbaïdjan",
-    "continent": "Asie",
+    "continent": "Europe",
     "capitale": "Bakou",
     "iso2": "AZ",
     "flag": "az.png",
@@ -859,7 +859,7 @@
   },
   {
     "nom": "Géorgie",
-    "continent": "Asie",
+    "continent": "Europe",
     "capitale": "Tbilissi",
     "iso2": "GE",
     "flag": "ge.png",
@@ -2289,7 +2289,7 @@
   },
   {
     "nom": "Turquie",
-    "continent": "Asie",
+    "continent": "Europe",
     "capitale": "Ankara",
     "iso2": "TR",
     "flag": "tr.png",
