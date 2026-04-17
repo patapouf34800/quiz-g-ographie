@@ -1962,14 +1962,28 @@
         }
 
         function quitGame() {
-            if (confirm('❌ Quitter la partie ?\n\nAucune progression ne sera sauvegardée.')) {
-                // Retour au menu sans rien sauvegarder
-                document.getElementById('gameScreen').classList.remove('active');
-                document.getElementById('configScreen').classList.remove('hidden');
-                
-                // Réinitialiser sans toucher à la collection du joueur
-                resetGameState();
+            const quitBtn = document.getElementById('quitGameBtn');
+            const isAfterAbandon = quitBtn.textContent.includes('Retour');
+            
+            // Si on est après un abandon, pas besoin de confirmation
+            if (isAfterAbandon) {
+                returnToMenu();
+                return;
             }
+            
+            // Sinon, demander confirmation (perte de progression)
+            if (confirm('❌ Quitter la partie ?\n\nAucune progression ne sera sauvegardée.')) {
+                returnToMenu();
+            }
+        }
+
+        function returnToMenu() {
+            // Retour au menu
+            document.getElementById('gameScreen').classList.remove('active');
+            document.getElementById('configScreen').classList.remove('hidden');
+            
+            // Réinitialiser l'état du jeu
+            resetGameState();
         }
 
         function abandonGame() {
@@ -2118,13 +2132,26 @@
             const input = document.getElementById('countryInput');
             if (input) {
                 input.disabled = false;
+                input.value = '';
             }
             
-            // Réafficher les boutons
+            // Masquer le feedback
+            const feedback = document.getElementById('inputFeedback');
+            if (feedback) {
+                feedback.classList.remove('show');
+            }
+            
+            // Réinitialiser les boutons à leur état d'origine
             const abandonBtn = document.getElementById('abandonGameBtn');
             const quitBtn = document.getElementById('quitGameBtn');
-            if (abandonBtn) abandonBtn.style.display = 'inline-block';
-            if (quitBtn) quitBtn.textContent = '❌ Quitter';
+            
+            if (abandonBtn) {
+                abandonBtn.style.display = 'inline-block';
+            }
+            
+            if (quitBtn) {
+                quitBtn.textContent = '❌ Quitter';
+            }
         }
 
         document.getElementById('quitGameBtn').addEventListener('click', quitGame);
