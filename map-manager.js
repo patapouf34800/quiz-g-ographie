@@ -155,7 +155,7 @@ class InteractiveMap {
           
           // Effet hover
           path.addEventListener('mouseenter', (e) => {
-            const countryCode = e.target.id;
+            const countryCode = e.target.id.toUpperCase(); // Normaliser en majuscules
             
             // Si le pays est trouvé, afficher le tooltip
             if (this.foundCountries.has(countryCode)) {
@@ -169,7 +169,8 @@ class InteractiveMap {
           
           path.addEventListener('mousemove', (e) => {
             // Positionner le tooltip près du curseur
-            if (this.foundCountries.has(e.target.id)) {
+            const countryCode = e.target.id.toUpperCase();
+            if (this.foundCountries.has(countryCode)) {
               this.tooltip.style.left = (e.pageX + 15) + 'px';
               this.tooltip.style.top = (e.pageY - 10) + 'px';
             }
@@ -179,7 +180,8 @@ class InteractiveMap {
             // Masquer le tooltip
             this.tooltip.style.display = 'none';
             
-            if (!this.foundCountries.has(e.target.id)) {
+            const countryCode = e.target.id.toUpperCase();
+            if (!this.foundCountries.has(countryCode)) {
               e.target.style.fill = '#E8E8E8';
             }
           });
