@@ -13,7 +13,7 @@ const COUNTRY_CODES = {
   'Danemark': 'DK', 'Suède': 'SE', 'Norvège': 'NO', 'Finlande': 'FI', 'Estonie': 'EE',
   'Lettonie': 'LV', 'Lituanie': 'LT', 'Irlande': 'IE', 'Royaume-Uni': 'GB', 'Islande': 'IS',
   'Malte': 'MT', 'Chypre': 'CY', 'Serbie': 'RS', 'Bosnie-Herzégovine': 'BA', 
-  'Monténégro': 'ME', 'Macédoine du Nord': 'MK', 'Albanie': 'AL', 'Kosovo': 'XK',
+  'Monténégro': 'ME', 'Macédoine du Nord': 'MK', 'Albanie': 'AL',
   'Ukraine': 'UA', 'Biélorussie': 'BY', 'Moldavie': 'MD', 'Monaco': 'MC', 'Andorre': 'AD',
   'Saint-Marin': 'SM', 'Liechtenstein': 'LI', 'Vatican': 'VA', 'Russie': 'RU',
   
