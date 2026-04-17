@@ -2105,11 +2105,12 @@
         function updateFoundList() {
             const foundList = document.getElementById('foundList');
             
-            // MODE CAPITALES : Afficher "Pays = Capitale" uniquement pour les pays trouvés
+            // MODE CAPITALES : Afficher tous les pays avec "= ???" ou "= Capitale"
             if (selectedMode === 'capitales') {
-                const foundCountriesData = currentGameCountries
-                    .filter(c => foundCountries.includes(c.iso2))
-                    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+                const allCountries = currentGameCountries.map(country => ({
+                    ...country,
+                    found: foundCountries.includes(country.iso2)
+                }));
 
                 if (selectedZone === 'monde') {
                     // Grouper par continent
@@ -2117,7 +2118,9 @@
                     let html = '';
 
                     continents.forEach(continent => {
-                        const countriesInContinent = foundCountriesData.filter(c => c.continent === continent);
+                        const countriesInContinent = allCountries
+                            .filter(c => c.continent === continent)
+                            .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
 
                         if (countriesInContinent.length > 0) {
                             html += `
@@ -2127,15 +2130,24 @@
                             `;
 
                             countriesInContinent.forEach(country => {
-                                html += `
-                                    <div class="found-item">
-                                        <img src="./flags/${country.iso2.toLowerCase()}.png" 
-                                             alt="${country.nom}" 
-                                             class="flag-img"
-                                             onerror="this.style.display='none'">
-                                        <span>${country.nom} = ${country.capitale}</span>
-                                    </div>
-                                `;
+                                if (country.found) {
+                                    html += `
+                                        <div class="found-item">
+                                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                                 alt="${country.nom}" 
+                                                 class="flag-img"
+                                                 onerror="this.style.display='none'">
+                                            <span>${country.nom} = ${country.capitale}</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div class="empty-item">
+                                            <span class="empty-flag">⬜</span>
+                                            <span class="empty-name">${country.nom} = ????</span>
+                                        </div>
+                                    `;
+                                }
                             });
 
                             html += `
@@ -2145,20 +2157,31 @@
                         }
                     });
 
-                    foundList.innerHTML = html || '<p style="color: #999; text-align: center;">Aucune capitale trouvée encore...</p>';
+                    foundList.innerHTML = html;
                 } else {
                     // Tri alphabétique simple
-                    foundList.innerHTML = foundCountriesData.map(country => {
-                        return `
-                            <div class="found-item">
-                                <img src="./flags/${country.iso2.toLowerCase()}.png" 
-                                     alt="${country.nom}" 
-                                     class="flag-img"
-                                     onerror="this.style.display='none'">
-                                <span>${country.nom} = ${country.capitale}</span>
-                            </div>
-                        `;
-                    }).join('') || '<p style="color: #999; text-align: center;">Aucune capitale trouvée encore...</p>';
+                    allCountries.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                    foundList.innerHTML = allCountries.map(country => {
+                        if (country.found) {
+                            return `
+                                <div class="found-item">
+                                    <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                         alt="${country.nom}" 
+                                         class="flag-img"
+                                         onerror="this.style.display='none'">
+                                    <span>${country.nom} = ${country.capitale}</span>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="empty-item">
+                                    <span class="empty-flag">⬜</span>
+                                    <span class="empty-name">${country.nom} = ????</span>
+                                </div>
+                            `;
+                        }
+                    }).join('');
                 }
                 return;
             }
