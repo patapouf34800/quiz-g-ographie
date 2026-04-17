@@ -2135,6 +2135,15 @@
                     </ul>
                     
                     <p style="font-size: 0.95em; color: #00838F; margin-top: 15px; font-weight: bold;">
+                        🎚️ Difficultés disponibles :
+                    </p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>😊 Facile :</strong> Pas de limite de pays - Sélectionne autant de pays que tu veux</li>
+                        <li><strong>😰 Difficile :</strong> Maximum 10 pays - Choisis bien tes pays !</li>
+                        <li><strong>🔥 Enfer :</strong> Maximum 10 pays + tu dois avoir au moins 1 pays par continent (Europe, Asie, Afrique, Amérique, Océanie)</li>
+                    </ul>
+                    
+                    <p style="font-size: 0.95em; color: #00838F; margin-top: 15px; font-weight: bold;">
                         💡 Conseils pour maximiser ton score :
                     </p>
                     <ul style="margin-top: 10px;">
@@ -2344,6 +2353,9 @@
                 <div class="game-stats">
                     <span class="stat-item">
                         Difficulté : <strong id="currentDifficulty">Facile</strong>
+                    </span>
+                    <span class="stat-item" id="countriesLimitDisplay" style="display: none;">
+                        Pays restants : <strong id="remainingCountries">7</strong>
                     </span>
                 </div>
             </div>
@@ -4968,7 +4980,9 @@
             currentPopulation: 0,
             selectedCountries: [],
             availableCountries: [],
-            categories: []
+            categories: [],
+            difficulty: 'facile', // facile, difficile, enfer
+            maxCountries: Infinity // Limite de pays (Infinity pour facile, 7 pour difficile, etc.)
         };
 
         function startPopulationGame() {
@@ -4999,6 +5013,24 @@
             // Réinitialiser l'état du jeu
             populationGameState.selectedCountries = [];
             populationGameState.currentPopulation = 0;
+            populationGameState.difficulty = selectedDifficulty;
+            
+            // Définir la limite de pays selon la difficulté
+            switch (selectedDifficulty) {
+                case 'facile':
+                    populationGameState.maxCountries = Infinity; // Pas de limite
+                    break;
+                case 'difficile':
+                    populationGameState.maxCountries = 10;
+                    break;
+                case 'enfer':
+                    populationGameState.maxCountries = 10; // + contrainte géographique
+                    break;
+                default:
+                    populationGameState.maxCountries = Infinity;
+            }
+            
+            console.log(`🎮 Mode: ${selectedDifficulty} - Limite: ${populationGameState.maxCountries} pays`);
             
             // Définir l'objectif aléatoire basé sur un échantillon de pays
             // Sélectionner 10-15 pays au hasard pour définir C
@@ -5035,6 +5067,15 @@
             // Afficher la difficulté
             document.getElementById('currentDifficulty').textContent = 
                 selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
+            
+            // Afficher l'indicateur de limite de pays si applicable
+            const limitDisplay = document.getElementById('countriesLimitDisplay');
+            if (populationGameState.maxCountries !== Infinity) {
+                limitDisplay.style.display = 'inline-block';
+                updateRemainingCountries();
+            } else {
+                limitDisplay.style.display = 'none';
+            }
             
             // Gérer le bouton quitter
             document.getElementById('quitPopulationGameBtn').onclick = () => {
@@ -5126,6 +5167,12 @@
                 return;
             }
             
+            // Vérifier si on a atteint la limite de pays (mode difficile/enfer)
+            if (populationGameState.selectedCountries.length >= populationGameState.maxCountries) {
+                alert(`⚠️ Limite atteinte !\n\nTu as déjà sélectionné ${populationGameState.maxCountries} pays (limite en mode ${populationGameState.difficulty}).\n\nTu dois soit dépasser l'objectif, soit t'arrêter maintenant !`);
+                return;
+            }
+            
             const country = populationGameState.availableCountries.find(c => c.iso2 === iso2);
             if (!country) return;
             
@@ -5148,6 +5195,35 @@
                 endPopulationGame(true);
                 return;
             }
+        }
+
+        // Fonction pour vérifier la contrainte géographique (mode enfer)
+        function checkGeographicConstraint() {
+            if (populationGameState.difficulty !== 'enfer') {
+                return true; // Pas de contrainte pour les autres modes
+            }
+            
+            // Définir les continents requis
+            const requiredContinents = ['Europe', 'Asie', 'Afrique', 'Amérique', 'Océanie'];
+            
+            // Compter les continents représentés
+            const continents = new Set();
+            populationGameState.selectedCountries.forEach(country => {
+                // Normaliser les continents américains
+                if (country.continent === 'Amérique du Nord' || country.continent === 'Amérique du Sud') {
+                    continents.add('Amérique');
+                } else {
+                    continents.add(country.continent);
+                }
+            });
+            
+            // Vérifier si tous les continents sont représentés
+            const missingContinents = requiredContinents.filter(c => !continents.has(c));
+            
+            return {
+                valid: missingContinents.length === 0,
+                missingContinents
+            };
         }
 
         function formatPopulation(pop) {
@@ -5180,11 +5256,31 @@
             }
         }
 
+        function updateRemainingCountries() {
+            if (populationGameState.maxCountries !== Infinity) {
+                const remaining = populationGameState.maxCountries - populationGameState.selectedCountries.length;
+                document.getElementById('remainingCountries').textContent = remaining;
+                
+                // Changer la couleur si proche de la limite
+                const remainingElement = document.getElementById('remainingCountries');
+                if (remaining <= 1) {
+                    remainingElement.style.color = '#EF4444'; // Rouge
+                } else if (remaining <= 2) {
+                    remainingElement.style.color = '#F59E0B'; // Orange
+                } else {
+                    remainingElement.style.color = 'inherit';
+                }
+            }
+        }
+
         function renderSelectedCountries() {
             const list = document.getElementById('selectedList');
             const count = document.getElementById('selectedCount');
             
             count.textContent = populationGameState.selectedCountries.length;
+            
+            // Mettre à jour le compteur de pays restants
+            updateRemainingCountries();
             
             if (populationGameState.selectedCountries.length === 0) {
                 list.innerHTML = '<p class="empty-message">Aucun pays sélectionné pour le moment</p>';
@@ -5266,11 +5362,33 @@
                 scoreDistance: Math.round(scoreDistance),
                 multiplicateurRisque: multiplicateurRisque.toFixed(2),
                 paysSignificatifs,
-                penalite
+                penalite,
+                difficulty: populationGameState.difficulty // Ajouter la difficulté pour l'enregistrement
             };
         }
 
         function endPopulationGame(exceeded) {
+            // Vérifier la contrainte géographique en mode enfer
+            if (!exceeded && populationGameState.difficulty === 'enfer') {
+                const geoCheck = checkGeographicConstraint();
+                if (!geoCheck.valid) {
+                    alert(`🌍 CONTRAINTE GÉOGRAPHIQUE NON RESPECTÉE !
+
+En mode ENFER, tu dois avoir au moins un pays de chaque continent :
+- Europe
+- Asie
+- Afrique
+- Amérique
+- Océanie
+
+Continents manquants : ${geoCheck.missingContinents.join(', ')}
+
+❌ Score : 0 points`);
+                    quitPopulationGame();
+                    return;
+                }
+            }
+            
             const score = calculatePopulationScore(exceeded);
             const populationMil = (populationGameState.currentPopulation / 1000000).toFixed(1);
             const objectifMil = (populationGameState.targetPopulation / 1000000).toFixed(1);
@@ -5329,6 +5447,7 @@ Pays significatifs : ${score.paysSignificatifs}
             document.getElementById('targetPopulation').textContent = '0';
             document.getElementById('remainingPopulation').textContent = '0';
             document.getElementById('populationProgress').style.width = '0%';
+            document.getElementById('countriesLimitDisplay').style.display = 'none';
             
             // Réinitialiser l'état
             populationGameState = {
@@ -5336,7 +5455,9 @@ Pays significatifs : ${score.paysSignificatifs}
                 currentPopulation: 0,
                 selectedCountries: [],
                 availableCountries: [],
-                categories: []
+                categories: [],
+                difficulty: 'facile',
+                maxCountries: Infinity
             };
         }
 
