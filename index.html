@@ -898,6 +898,14 @@
             font-size: 1.2em;
         }
 
+        .flag-img {
+            width: 24px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
         .empty-item {
             background: #f5f5f5;
             padding: 8px 15px;
@@ -1856,7 +1864,10 @@
                             if (country.found) {
                                 html += `
                                     <div class="found-item">
-                                        <span class="flag">🏴</span>
+                                        <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                             alt="${country.nom}" 
+                                             class="flag-img"
+                                             onerror="this.style.display='none'">
                                         <span>${country.nom}</span>
                                     </div>
                                 `;
@@ -1886,7 +1897,10 @@
                     if (country.found) {
                         return `
                             <div class="found-item">
-                                <span class="flag">🏴</span>
+                                <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                     alt="${country.nom}" 
+                                     class="flag-img"
+                                     onerror="this.style.display='none'">
                                 <span>${country.nom}</span>
                             </div>
                         `;
