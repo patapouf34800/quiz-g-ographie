@@ -4974,14 +4974,28 @@
             populationGameState.selectedCountries = [];
             populationGameState.currentPopulation = 0;
             
-            // Définir l'objectif aléatoire : entre 5 millions et la somme totale de tous les pays
-            const totalWorldPopulation = countriesData.reduce((sum, c) => sum + c.habitants, 0);
+            // Définir l'objectif aléatoire basé sur un échantillon de pays
+            // Sélectionner 10-15 pays au hasard pour définir C
+            const nbPaysObjectif = Math.floor(Math.random() * 6) + 10; // 10 à 15
+            const paysAleatoires = [...countriesData]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, nbPaysObjectif);
+
+            const C = paysAleatoires.reduce((sum, c) => sum + c.habitants, 0);
+
+            // Trouver l'Inde
+            const inde = countriesData.find(c => c.iso2 === 'IN');
+            const populationInde = inde ? inde.habitants : 1400000000; // fallback
+
+            // Objectif aléatoire entre 5M et (C/2 + Inde)
             const minPopulation = 5000000; // 5 millions
+            const maxPopulation = (C / 2) + populationInde;
+
             populationGameState.targetPopulation = Math.floor(
-                Math.random() * (totalWorldPopulation - minPopulation) + minPopulation
+                Math.random() * (maxPopulation - minPopulation) + minPopulation
             );
             
-            console.log(`🎯 Objectif: ${(populationGameState.targetPopulation / 1000000).toFixed(1)}M sur ${(totalWorldPopulation / 1000000).toFixed(1)}M total`);
+            console.log(`🎯 Objectif: ${(populationGameState.targetPopulation / 1000000).toFixed(1)}M (plage: 5M - ${(maxPopulation/1000000).toFixed(0)}M, basé sur ${nbPaysObjectif} pays)`);
             
             // Copier tous les pays disponibles
             populationGameState.availableCountries = [...countriesData];
