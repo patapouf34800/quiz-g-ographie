@@ -1679,19 +1679,33 @@
                         return '';
                     }
                     
-                    // Vérifier que collection existe, sinon l'initialiser
-                    if (!data.collection) {
-                        data.collection = [];
+                    // Initialiser stats si nécessaire (rétrocompatibilité)
+                    if (!data.stats) {
+                        data.stats = {
+                            'nomme-pays': {},
+                            'capitales': {},
+                            'expert': {}
+                        };
                     }
                     if (!data.badges) {
                         data.badges = [];
                     }
                     
+                    // Calculer le nombre de pays découverts
+                    const allCountries = new Set();
+                    Object.values(data.stats).forEach(modeStats => {
+                        Object.keys(modeStats).forEach(iso2 => {
+                            if (modeStats[iso2] > 0) {
+                                allCountries.add(iso2);
+                            }
+                        });
+                    });
+                    
                     return `
                         <div class="player-item" onclick="selectPlayer('${name}')">
                             <div class="name">${name}</div>
                             <div class="stats">
-                                ${data.collection.length} pays découverts
+                                ${allCountries.size} pays découverts
                             </div>
                             <button class="delete-btn" onclick="event.stopPropagation(); deletePlayer('${name}')">
                                 Supprimer
@@ -1790,7 +1804,28 @@
 
         function savePlayerData() {
             localStorage.setItem('geoQuizPlayers', JSON.stringify(playerData));
+            console.log('💾 Données sauvegardées:', playerData);
         }
+
+        // 🔍 Fonction de debug pour inspecter le localStorage
+        window.debugStorage = function() {
+            console.log('=== DEBUG LOCALSTORAGE ===');
+            const stored = localStorage.getItem('geoQuizPlayers');
+            console.log('Raw data:', stored);
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                console.log('Parsed data:', parsed);
+                console.log('Nombre de joueurs:', Object.keys(parsed).length);
+                Object.keys(parsed).forEach(playerName => {
+                    console.log(`\n👤 ${playerName}:`);
+                    console.log('  Stats:', parsed[playerName].stats);
+                    console.log('  Badges:', parsed[playerName].badges);
+                });
+            } else {
+                console.log('❌ Aucune donnée trouvée');
+            }
+            console.log('========================');
+        };
 
         // 📊 Fonction utile pour voir les stats détaillées dans la console
         // Usage: showPlayerStats() ou showPlayerStats('Alice')
@@ -2006,7 +2041,8 @@
                                 src="./flags/${country.iso2.toLowerCase()}.png" 
                                 alt="${country.nom}"
                                 class="country-flag"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                onerror="console.log('❌ Image non chargée: ./flags/${country.iso2.toLowerCase()}.png'); this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                onload="console.log('✅ Image chargée: ./flags/${country.iso2.toLowerCase()}.png');"
                             >
                             <div class="flag-emoji" style="display:none; font-size: 2.5em;">🏴</div>
                         </div>
