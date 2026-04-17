@@ -1799,6 +1799,31 @@
             color: #48BB78;
         }
 
+        /* Badges de continents (mode enfer) */
+        .continent-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 0 5px;
+            border-radius: 12px;
+            background: #E5E7EB;
+            color: #6B7280;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+
+        .continent-badge.validated {
+            background: #DCFCE7;
+            color: #166534;
+            opacity: 1;
+        }
+
+        .continent-badge.validated::before {
+            content: "✓ ";
+            font-weight: bold;
+        }
+
         /* ========================================
            RESPONSIVE
         ======================================== */
@@ -2355,8 +2380,17 @@
                         Difficulté : <strong id="currentDifficulty">Facile</strong>
                     </span>
                     <span class="stat-item" id="countriesLimitDisplay" style="display: none;">
-                        Pays restants : <strong id="remainingCountries">7</strong>
+                        Pays restants : <strong id="remainingCountries">10</strong>
                     </span>
+                </div>
+                <!-- Indicateur des continents (mode enfer uniquement) -->
+                <div id="continentsIndicator" style="display: none; margin-top: 10px; font-size: 0.9em;">
+                    <span style="opacity: 0.8;">Continents :</span>
+                    <span id="continent-europe" class="continent-badge">🇪🇺 Europe</span>
+                    <span id="continent-asie" class="continent-badge">🌏 Asie</span>
+                    <span id="continent-afrique" class="continent-badge">🌍 Afrique</span>
+                    <span id="continent-amerique" class="continent-badge">🌎 Amérique</span>
+                    <span id="continent-oceanie" class="continent-badge">🏝️ Océanie</span>
                 </div>
             </div>
             <div class="game-buttons">
@@ -5070,11 +5104,21 @@
             
             // Afficher l'indicateur de limite de pays si applicable
             const limitDisplay = document.getElementById('countriesLimitDisplay');
+            const continentsIndicator = document.getElementById('continentsIndicator');
+            
             if (populationGameState.maxCountries !== Infinity) {
                 limitDisplay.style.display = 'inline-block';
                 updateRemainingCountries();
             } else {
                 limitDisplay.style.display = 'none';
+            }
+            
+            // Afficher l'indicateur de continents en mode enfer
+            if (selectedDifficulty === 'enfer') {
+                continentsIndicator.style.display = 'block';
+                updateContinentsIndicator();
+            } else {
+                continentsIndicator.style.display = 'none';
             }
             
             // Gérer le bouton quitter
@@ -5273,6 +5317,43 @@
             }
         }
 
+        function updateContinentsIndicator() {
+            if (populationGameState.difficulty !== 'enfer') {
+                return;
+            }
+            
+            // Compter les continents représentés
+            const continents = new Set();
+            populationGameState.selectedCountries.forEach(country => {
+                // Normaliser les continents américains
+                if (country.continent === 'Amérique du Nord' || country.continent === 'Amérique du Sud') {
+                    continents.add('Amérique');
+                } else {
+                    continents.add(country.continent);
+                }
+            });
+            
+            // Mettre à jour les badges
+            const continentMap = {
+                'Europe': 'continent-europe',
+                'Asie': 'continent-asie',
+                'Afrique': 'continent-afrique',
+                'Amérique': 'continent-amerique',
+                'Océanie': 'continent-oceanie'
+            };
+            
+            Object.entries(continentMap).forEach(([continent, id]) => {
+                const badge = document.getElementById(id);
+                if (badge) {
+                    if (continents.has(continent)) {
+                        badge.classList.add('validated');
+                    } else {
+                        badge.classList.remove('validated');
+                    }
+                }
+            });
+        }
+
         function renderSelectedCountries() {
             const list = document.getElementById('selectedList');
             const count = document.getElementById('selectedCount');
@@ -5281,6 +5362,9 @@
             
             // Mettre à jour le compteur de pays restants
             updateRemainingCountries();
+            
+            // Mettre à jour l'indicateur de continents (mode enfer)
+            updateContinentsIndicator();
             
             if (populationGameState.selectedCountries.length === 0) {
                 list.innerHTML = '<p class="empty-message">Aucun pays sélectionné pour le moment</p>';
@@ -5448,6 +5532,7 @@ Pays significatifs : ${score.paysSignificatifs}
             document.getElementById('remainingPopulation').textContent = '0';
             document.getElementById('populationProgress').style.width = '0%';
             document.getElementById('countriesLimitDisplay').style.display = 'none';
+            document.getElementById('continentsIndicator').style.display = 'none';
             
             // Réinitialiser l'état
             populationGameState = {
