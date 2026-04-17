@@ -29,8 +29,8 @@ const COUNTRY_CODES = {
   
   // Asie
   'Chine': 'CN', 'Japon': 'JP', 'Inde': 'IN', 'Corée du Sud': 'KR', 'Corée du Nord': 'KP',
-  'Thaïlande': 'TH', 'Vietnam': 'VN', 'Indonésie': 'ID', 'Philippines': 'PH', 'Malaisie': 'MY',
-  'Singapour': 'SG', 'Birmanie': 'MM', 'Cambodge': 'KH', 'Laos': 'LA', 'Bangladesh': 'BD',
+  'Thaïlande': 'TH', 'Viêt Nam': 'VN', 'Indonésie': 'ID', 'Philippines': 'PH', 'Malaisie': 'MY',
+  'Singapour': 'SG', 'Myanmar': 'MM', 'Cambodge': 'KH', 'Laos': 'LA', 'Bangladesh': 'BD',
   'Pakistan': 'PK', 'Sri Lanka': 'LK', 'Népal': 'NP', 'Bhoutan': 'BT', 'Maldives': 'MV',
   'Afghanistan': 'AF', 'Kazakhstan': 'KZ', 'Ouzbékistan': 'UZ', 'Turkménistan': 'TM',
   'Kirghizistan': 'KG', 'Tadjikistan': 'TJ', 'Mongolie': 'MN', 'Brunei': 'BN',
