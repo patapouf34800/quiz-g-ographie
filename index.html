@@ -1276,7 +1276,17 @@
         // =====================================
         
         let currentPlayer = null;
-        let playerData = JSON.parse(localStorage.getItem('geoQuizPlayers')) || {};
+        let playerData = {};
+        
+        // Charger les données des joueurs depuis localStorage avec gestion d'erreur
+        try {
+            const stored = localStorage.getItem('geoQuizPlayers');
+            playerData = stored ? JSON.parse(stored) : {};
+        } catch (error) {
+            console.error('Erreur chargement localStorage:', error);
+            playerData = {};
+        }
+        
         let countriesData = []; // Sera chargé depuis le JSON
         let currentGameCountries = []; // Pays de la partie en cours
         let foundCountries = []; // Pays trouvés dans la partie en cours
@@ -1338,12 +1348,24 @@
             const savedPlayersSection = document.getElementById('savedPlayersSection');
             const playerList = document.getElementById('playerList');
             
-            const players = Object.keys(playerData);
+            if (!savedPlayersSection || !playerList) {
+                console.warn('Éléments savedPlayersSection ou playerList non trouvés');
+                return;
+            }
+            
+            const players = Object.keys(playerData || {});
             
             if (players.length > 0) {
                 savedPlayersSection.style.display = 'block';
                 playerList.innerHTML = players.map(name => {
                     const data = playerData[name];
+                    
+                    // Sécurité : vérifier que data existe
+                    if (!data) {
+                        console.warn(`Données manquantes pour le joueur: ${name}`);
+                        return '';
+                    }
+                    
                     // Vérifier que collection existe, sinon l'initialiser
                     if (!data.collection) {
                         data.collection = [];
@@ -1351,6 +1373,7 @@
                     if (!data.badges) {
                         data.badges = [];
                     }
+                    
                     return `
                         <div class="player-item" onclick="selectPlayer('${name}')">
                             <div class="name">${name}</div>
@@ -1362,7 +1385,7 @@
                             </button>
                         </div>
                     `;
-                }).join('');
+                }).filter(html => html !== '').join('');
             } else {
                 savedPlayersSection.style.display = 'none';
             }
