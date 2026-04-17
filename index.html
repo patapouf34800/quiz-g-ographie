@@ -826,6 +826,17 @@
             opacity: 0.3;
         }
 
+        .badge-card-emoji {
+            font-size: 5em;
+            margin: 15px auto;
+            text-align: center;
+        }
+
+        .badge-card.locked .badge-card-emoji {
+            filter: grayscale(100%);
+            opacity: 0.3;
+        }
+
         .badge-medal {
             position: absolute;
             top: 10px;
@@ -2805,7 +2816,7 @@
 
                     html += `
                         <div class="badge-card ${status}" onclick="openBadgeModal('${badge.id}', 'exploration')">
-                            <div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>
+                            <div class="badge-card-emoji">${badge.emoji}</div>
                             <div class="badge-${status === 'locked' ? 'lock' : 'medal'}">${medal}</div>
                             <div class="badge-name">${badge.name}</div>
                             <div class="badge-progress">${progress.mastered}/${progress.total} (${progress.percent}%)</div>
