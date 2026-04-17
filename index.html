@@ -760,8 +760,31 @@
             border-radius: 8px;
         }
 
+        .game-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-abandon {
+            background: #F59E0B;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-abandon:hover {
+            background: #D97706;
+            transform: translateY(-2px);
+        }
+
         .btn-quit {
-            background: #f56565;
+            background: #6b7280;
             color: white;
             border: none;
             padding: 12px 25px;
@@ -773,7 +796,7 @@
         }
 
         .btn-quit:hover {
-            background: #e53e3e;
+            background: #4b5563;
             transform: translateY(-2px);
         }
 
@@ -924,6 +947,18 @@
 
         .empty-item .empty-name {
             font-style: italic;
+        }
+
+        .missed-item {
+            background: #FEE2E2;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid #EF4444;
+            color: #991B1B;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* ========================================
@@ -1287,7 +1322,10 @@
                         </span>
                     </div>
                 </div>
-                <button class="btn-quit" id="quitGameBtn">❌ Quitter</button>
+                <div class="game-buttons">
+                    <button class="btn-abandon" id="abandonGameBtn">🏳️ Abandonner</button>
+                    <button class="btn-quit" id="quitGameBtn">❌ Quitter</button>
+                </div>
             </div>
 
             <!-- Zone de la carte interactive -->
@@ -1923,17 +1961,174 @@
         }
 
         function quitGame() {
-            if (confirm('Quitter la partie en cours ?')) {
+            if (confirm('❌ Quitter la partie ?\n\nAucune progression ne sera sauvegardée.')) {
+                // Retour au menu sans rien sauvegarder
                 document.getElementById('gameScreen').classList.remove('active');
                 document.getElementById('configScreen').classList.remove('hidden');
                 
-                // Mettre à jour l'interface du joueur
-                updatePlayerUI();
+                // Réinitialiser sans toucher à la collection du joueur
+                resetGameState();
             }
         }
 
-        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        function abandonGame() {
+            if (confirm('🏳️ Abandonner la partie ?\n\nTa progression actuelle sera comptabilisée et les pays manquants seront révélés.')) {
+                // Sauvegarder la progression actuelle dans la collection
+                saveCurrentProgress();
+                
+                // Révéler tous les pays manquants
+                revealMissingCountries();
+                
+                // Désactiver l'input
+                document.getElementById('countryInput').disabled = true;
+                
+                // Afficher un message d'abandon
+                const feedback = document.getElementById('inputFeedback');
+                feedback.textContent = `🏳️ Partie abandonnée ! Tu as trouvé ${foundCountries.length}/${currentGameCountries.length} pays.`;
+                feedback.className = 'input-feedback show incorrect';
+                
+                // Masquer les boutons d'action
+                document.getElementById('abandonGameBtn').style.display = 'none';
+                document.getElementById('quitGameBtn').textContent = '← Retour au menu';
+            }
+        }
+
+        function saveCurrentProgress() {
+            // Sauvegarder tous les pays trouvés dans cette partie
+            foundCountries.forEach(iso2 => {
+                if (!playerData[currentPlayer].collection.includes(iso2)) {
+                    playerData[currentPlayer].collection.push(iso2);
+                }
+            });
+            savePlayerData();
+        }
+
+        function revealMissingCountries() {
+            // Marquer tous les pays comme "révélés" pour l'affichage
+            currentGameCountries.forEach(country => {
+                if (!foundCountries.includes(country.iso2)) {
+                    // Ajouter une classe spéciale pour les pays révélés mais non trouvés
+                    // On les affiche mais différemment
+                }
+            });
+            
+            // Mettre à jour la liste pour tout afficher
+            updateFoundListWithRevealed();
+        }
+
+        function updateFoundListWithRevealed() {
+            const foundList = document.getElementById('foundList');
+            
+            // Créer une liste complète
+            const allCountries = currentGameCountries.map(country => ({
+                ...country,
+                found: foundCountries.includes(country.iso2),
+                revealed: true // Tout est révélé en mode abandon
+            }));
+
+            // Si c'est le monde entier, grouper par continent
+            if (selectedZone === 'monde') {
+                const continents = ['Afrique', 'Amérique', 'Asie', 'Europe', 'Océanie'];
+                let html = '';
+
+                continents.forEach(continent => {
+                    const countriesInContinent = allCountries
+                        .filter(c => c.continent === continent)
+                        .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                    if (countriesInContinent.length > 0) {
+                        html += `
+                            <div class="continent-group">
+                                <h4 class="continent-title">${continent}</h4>
+                                <div class="continent-countries">
+                        `;
+
+                        countriesInContinent.forEach(country => {
+                            if (country.found) {
+                                // Pays trouvé - vert
+                                html += `
+                                    <div class="found-item">
+                                        <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                             alt="${country.nom}" 
+                                             class="flag-img"
+                                             onerror="this.style.display='none'">
+                                        <span>${country.nom}</span>
+                                    </div>
+                                `;
+                            } else {
+                                // Pays manqué - rouge
+                                html += `
+                                    <div class="missed-item">
+                                        <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                             alt="${country.nom}" 
+                                             class="flag-img"
+                                             onerror="this.style.display='none'">
+                                        <span>${country.nom}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                foundList.innerHTML = html;
+            } else {
+                // Pour les autres zones, tri alphabétique simple
+                allCountries.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                foundList.innerHTML = allCountries.map(country => {
+                    if (country.found) {
+                        return `
+                            <div class="found-item">
+                                <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                     alt="${country.nom}" 
+                                     class="flag-img"
+                                     onerror="this.style.display='none'">
+                                <span>${country.nom}</span>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="missed-item">
+                                <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                     alt="${country.nom}" 
+                                     class="flag-img"
+                                     onerror="this.style.display='none'">
+                                <span>${country.nom}</span>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            }
+        }
+
+        function resetGameState() {
+            // Réinitialiser l'état du jeu
+            foundCountries = [];
+            currentGameCountries = [];
+            currentMap = null;
+            
+            // Réactiver l'input
+            const input = document.getElementById('countryInput');
+            if (input) {
+                input.disabled = false;
+            }
+            
+            // Réafficher les boutons
+            const abandonBtn = document.getElementById('abandonGameBtn');
+            const quitBtn = document.getElementById('quitGameBtn');
+            if (abandonBtn) abandonBtn.style.display = 'inline-block';
+            if (quitBtn) quitBtn.textContent = '❌ Quitter';
+        }
+
         document.getElementById('quitGameBtn').addEventListener('click', quitGame);
+        document.getElementById('abandonGameBtn').addEventListener('click', abandonGame);
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
         
         document.getElementById('countryInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
