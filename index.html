@@ -3074,6 +3074,9 @@
             
             // Réinitialiser l'état du jeu
             resetGameState();
+            
+            // Mettre à jour l'interface utilisateur (collection, badges, stats)
+            updatePlayerUI();
         }
 
         function abandonGame() {
@@ -3347,6 +3350,8 @@
                 currentPlayer = null;
                 document.getElementById('configScreen').classList.add('hidden');
                 document.getElementById('playerSelectionScreen').classList.remove('hidden');
+                // Recharger la liste des joueurs
+                loadPlayers();
             }
         });
 
