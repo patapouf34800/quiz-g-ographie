@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Géo Quiz - Découvre les pays du monde</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Jeu éducatif pour apprendre la géographie mondiale - 195 pays à découvrir !">
+    <meta name="theme-color" content="#00ACC1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Géo Quiz">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #00838F 0%, #00ACC1 50%, #26C6DA 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00838F;
+            margin-bottom: 5px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #00ACC1;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* ========================================
+           ÉCRAN DE SÉLECTION DU JOUEUR
+        ======================================== */
+
+        .player-selection-screen {
+            display: block;
+        }
+
+        .player-selection-screen.hidden {
+            display: none;
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .player-card h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .player-input-group {
+            margin: 20px 0;
+        }
+
+        .player-input-group label {
+            display: block;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .player-input-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.5em;
+            border: 3px solid white;
+            border-radius: 15px;
+            text-align: center;
+            font-family: 'Segoe UI', Arial;
+        }
+
+        .player-input-group input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.3);
+        }
+
+        .btn-primary {
+            background: white;
+            color: #00838F;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .saved-players {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .saved-players h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .player-item {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 3px solid #00ACC1;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .player-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: #00838F;
+        }
+
+        .player-item .name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .player-item .stats {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .player-item .delete-btn {
+            margin-top: 10px;
+            padding: 5px 15px;
+            background: #f56565;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .player-item .delete-btn:hover {
+            background: #e53e3e;
+        }
+
+        /* ========================================
+           NAVIGATION PAR ONGLETS
+        ======================================== */
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: transparent;
+            color: #666;
+            padding: 15px 30px;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            margin-bottom: -3px;
+        }
+
+        .tab:hover {
+            color: #00838F;
+            background: rgba(0, 131, 143, 0.05);
+        }
+
+        .tab.active {
+            color: #00838F;
+            border-bottom-color: #00838F;
+            background: rgba(0, 131, 143, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ========================================
+           ÉCRAN DE CONFIGURATION (Onglet Jouer)
+        ======================================== */
+
+        .config-screen {
+            display: none;
+        }
+
+        .config-screen:not(.hidden) {
+            display: block;
+        }
+
+        .current-player-banner {
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .current-player-info h3 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .current-player-info .stats {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .btn-change-player {
+            background: white;
+            color: #00838F;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-change-player:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .config-section {
+            background: #f7f7f7;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .config-section h3 {
+            color: #00838F;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .zone-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .zone-card {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .zone-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .zone-card.selected {
+            background: #00ACC1;
+            color: white;
+            border-color: #00838F;
+            box-shadow: 0 5px 20px rgba(0, 131, 143, 0.3);
+        }
+
+        .zone-card .emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .zone-card .name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .zone-card .count {
+            font-size: 0.9em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .btn-start-game {
+            background: linear-gradient(135deg, #48BB78, #38A169);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(72, 187, 120, 0.3);
+            width: 100%;
+        }
+
+        .btn-start-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+        }
+
+        /* ========================================
+           COLLECTION (Onglet Collection)
+        ======================================== */
+
+        .collection-screen {
+            display: none;
+        }
+
+        .collection-screen.active {
+            display: block;
+        }
+
+        .collection-header {
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .collection-header h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .collection-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            font-size: 1.2em;
+        }
+
+        .collection-stats .stat {
+            text-align: center;
+        }
+
+        .collection-stats .stat .number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .continent-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .continent-tab {
+            background: #e0e0e0;
+            color: #333;
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 3px solid #ccc;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .continent-tab:hover {
+            background: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .continent-tab.active {
+            background: linear-gradient(135deg, #00ACC1, #00838F);
+            color: white;
+            border-color: #00838F;
+            box-shadow: 0 5px 15px rgba(0, 131, 143, 0.3);
+        }
+
+        .continent-tab .count {
+            display: block;
+            font-size: 0.85em;
+            margin-top: 3px;
+            opacity: 0.9;
+        }
+
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .country-card-collection {
+            background: white;
+            border: 3px solid #00ACC1;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .country-card-collection.locked {
+            background: #f5f5f5;
+            border-color: #e0e0e0;
+            opacity: 0.6;
+        }
+
+        .country-card-collection .flag {
+            font-size: 3em;
+            margin-bottom: 10px;
+            filter: grayscale(100%);
+        }
+
+        .country-card-collection.unlocked .flag {
+            filter: grayscale(0%);
+        }
+
+        .country-card-collection .name {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .country-card-collection .code {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .country-card-collection.locked .name {
+            color: #999;
+        }
+
+        /* ========================================
+           BADGES (Onglet Badges)
+        ======================================== */
+
+        .badges-screen {
+            display: none;
+        }
+
+        .badges-screen.active {
+            display: block;
+        }
+
+        .badges-header {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .badges-header h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .badge-card {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .badge-card.unlocked {
+            border-color: #F59E0B;
+            box-shadow: 0 5px 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-card .badge-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            filter: grayscale(100%);
+            opacity: 0.4;
+        }
+
+        .badge-card.unlocked .badge-icon {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+        .badge-card .badge-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .badge-card .badge-description {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .badge-card .badge-progress {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .badge-card.unlocked .badge-progress {
+            color: #48BB78;
+            font-weight: bold;
+        }
+
+        /* ========================================
+           COMMENT JOUER (Onglet Aide)
+        ======================================== */
+
+        .help-screen {
+            display: none;
+        }
+
+        .help-screen.active {
+            display: block;
+        }
+
+        .help-section {
+            background: #f7f7f7;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .help-section h3 {
+            color: #00838F;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .help-section p {
+            color: #333;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .help-section ul {
+            margin-left: 20px;
+            color: #333;
+            line-height: 1.8;
+        }
+
+        .help-section .example {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #00ACC1;
+            margin-top: 15px;
+        }
+
+        /* ========================================
+           ÉCRAN DE JEU
+        ======================================== */
+
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .game-header {
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .game-info h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 1.2em;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .btn-quit {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-quit:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .map-container {
+            background: #f7f7f7;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #e0e0e0;
+        }
+
+        .map-loading {
+            font-size: 1.2em;
+            color: #00838F;
+            text-align: center;
+        }
+
+        .input-zone {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 3px solid #00ACC1;
+        }
+
+        .input-zone input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.3em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Segoe UI', Arial;
+        }
+
+        .input-zone input:focus {
+            outline: none;
+            border-color: #00ACC1;
+            box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+        }
+
+        .input-feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            display: none;
+        }
+
+        .input-feedback.show {
+            display: block;
+        }
+
+        .input-feedback.correct {
+            background: #C6F6D5;
+            color: #22543D;
+            border: 2px solid #48BB78;
+        }
+
+        .input-feedback.incorrect {
+            background: #FED7D7;
+            color: #742A2A;
+            border: 2px solid #F56565;
+        }
+
+        .found-countries {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .found-countries h3 {
+            color: #00838F;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .found-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .found-item {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px solid #48BB78;
+            color: #22543D;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .found-item .flag {
+            font-size: 1.2em;
+        }
+
+        /* ========================================
+           RESPONSIVE
+        ======================================== */
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .tabs {
+                justify-content: center;
+            }
+
+            .tab {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+
+            .zone-selection {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .game-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .game-info {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌍 Géo Quiz</h1>
+        <p class="subtitle">Découvre les pays du monde entier !</p>
+
+        <!-- ========================================
+             ÉCRAN DE SÉLECTION DU JOUEUR
+        ======================================== -->
+        <div class="player-selection-screen" id="playerSelectionScreen">
+            <div class="player-card">
+                <h2>👤 Qui es-tu ?</h2>
+                <div class="player-input-group">
+                    <label for="playerNameInput">Entre ton prénom :</label>
+                    <input type="text" id="playerNameInput" placeholder="Ex: Sarah" maxlength="20">
+                </div>
+                <button class="btn-primary" id="createPlayerBtn">Commencer !</button>
+            </div>
+
+            <div class="saved-players" id="savedPlayersSection" style="display: none;">
+                <h3>🎮 Joueurs sauvegardés</h3>
+                <div class="player-list" id="playerList"></div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             ÉCRAN PRINCIPAL AVEC ONGLETS
+        ======================================== -->
+        <div class="config-screen hidden" id="configScreen">
+            <!-- Bannière du joueur actuel -->
+            <div class="current-player-banner">
+                <div class="current-player-info">
+                    <h3>👋 Bonjour <span id="currentPlayerName"></span> !</h3>
+                    <div class="stats">
+                        <span id="playerCollectionCount">0</span> pays découverts • 
+                        <span id="playerBadgeCount">0</span> badges
+                    </div>
+                </div>
+                <button class="btn-change-player" id="changePlayerBtn">Changer de joueur</button>
+            </div>
+
+            <!-- Onglets de navigation -->
+            <div class="tabs">
+                <button class="tab active" data-tab="play">🎮 Jouer</button>
+                <button class="tab" data-tab="collection">📚 Collection</button>
+                <button class="tab" data-tab="badges">🏆 Badges</button>
+                <button class="tab" data-tab="help">❓ Comment jouer</button>
+            </div>
+
+            <!-- ========================================
+                 ONGLET 1 : JOUER
+            ======================================== -->
+            <div class="tab-content active" id="playTab">
+                <div class="config-section">
+                    <h3>🗺️ Choisis une zone géographique</h3>
+                    <div class="zone-selection">
+                        <div class="zone-card" data-zone="monde">
+                            <div class="emoji">🌍</div>
+                            <div class="name">Monde</div>
+                            <div class="count">195 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="europe">
+                            <div class="emoji">🇪🇺</div>
+                            <div class="name">Europe</div>
+                            <div class="count">45 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="asie">
+                            <div class="emoji">🌏</div>
+                            <div class="name">Asie</div>
+                            <div class="count">48 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="afrique">
+                            <div class="emoji">🦁</div>
+                            <div class="name">Afrique</div>
+                            <div class="count">54 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="amerique-nord">
+                            <div class="emoji">🌎</div>
+                            <div class="name">Amérique du Nord</div>
+                            <div class="count">23 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="amerique-sud">
+                            <div class="emoji">🗺️</div>
+                            <div class="name">Amérique du Sud</div>
+                            <div class="count">12 pays</div>
+                        </div>
+                        <div class="zone-card" data-zone="oceanie">
+                            <div class="emoji">🏝️</div>
+                            <div class="name">Océanie</div>
+                            <div class="count">14 pays</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-start-game" id="startGameBtn">🚀 Lancer le quiz !</button>
+            </div>
+
+            <!-- ========================================
+                 ONGLET 2 : COLLECTION
+            ======================================== -->
+            <div class="tab-content" id="collectionTab">
+                <div class="collection-header">
+                    <h2>📚 Ma Collection de Pays</h2>
+                    <div class="collection-stats">
+                        <div class="stat">
+                            <span class="number" id="collectionTotal">0</span>
+                            <span>Pays découverts</span>
+                        </div>
+                        <div class="stat">
+                            <span class="number" id="collectionPercentage">0%</span>
+                            <span>Complétude</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="continent-tabs">
+                    <div class="continent-tab active" data-continent="tous">
+                        Tous
+                        <span class="count">0/195</span>
+                    </div>
+                    <div class="continent-tab" data-continent="europe">
+                        Europe
+                        <span class="count">0/45</span>
+                    </div>
+                    <div class="continent-tab" data-continent="asie">
+                        Asie
+                        <span class="count">0/48</span>
+                    </div>
+                    <div class="continent-tab" data-continent="afrique">
+                        Afrique
+                        <span class="count">0/54</span>
+                    </div>
+                    <div class="continent-tab" data-continent="amérique">
+                        Amérique
+                        <span class="count">0/35</span>
+                    </div>
+                    <div class="continent-tab" data-continent="océanie">
+                        Océanie
+                        <span class="count">0/14</span>
+                    </div>
+                </div>
+
+                <div class="collection-grid" id="collectionGrid">
+                    <!-- Les cartes de pays seront générées dynamiquement ici -->
+                </div>
+            </div>
+
+            <!-- ========================================
+                 ONGLET 3 : BADGES
+            ======================================== -->
+            <div class="tab-content" id="badgesTab">
+                <div class="badges-header">
+                    <h2>🏆 Mes Badges</h2>
+                    <p>Débloque des badges en découvrant des pays !</p>
+                </div>
+
+                <div class="badges-grid">
+                    <div class="badge-card" data-badge="first">
+                        <div class="badge-icon">🎯</div>
+                        <div class="badge-name">Premier Pas</div>
+                        <div class="badge-description">Découvre ton premier pays</div>
+                        <div class="badge-progress">0/1</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="explorer">
+                        <div class="badge-icon">🗺️</div>
+                        <div class="badge-name">Explorateur</div>
+                        <div class="badge-description">Découvre 10 pays</div>
+                        <div class="badge-progress">0/10</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="adventurer">
+                        <div class="badge-icon">✈️</div>
+                        <div class="badge-name">Aventurier</div>
+                        <div class="badge-description">Découvre 25 pays</div>
+                        <div class="badge-progress">0/25</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="traveler">
+                        <div class="badge-icon">🌟</div>
+                        <div class="badge-name">Grand Voyageur</div>
+                        <div class="badge-description">Découvre 50 pays</div>
+                        <div class="badge-progress">0/50</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="master">
+                        <div class="badge-icon">👑</div>
+                        <div class="badge-name">Maître Géographe</div>
+                        <div class="badge-description">Découvre 100 pays</div>
+                        <div class="badge-progress">0/100</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="complete">
+                        <div class="badge-icon">🌍</div>
+                        <div class="badge-name">Tour du Monde</div>
+                        <div class="badge-description">Découvre les 195 pays</div>
+                        <div class="badge-progress">0/195</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="europe">
+                        <div class="badge-icon">🇪🇺</div>
+                        <div class="badge-name">Expert Europe</div>
+                        <div class="badge-description">Découvre tous les pays d'Europe</div>
+                        <div class="badge-progress">0/45</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="asia">
+                        <div class="badge-icon">🌏</div>
+                        <div class="badge-name">Expert Asie</div>
+                        <div class="badge-description">Découvre tous les pays d'Asie</div>
+                        <div class="badge-progress">0/48</div>
+                    </div>
+
+                    <div class="badge-card" data-badge="africa">
+                        <div class="badge-icon">🦁</div>
+                        <div class="badge-name">Expert Afrique</div>
+                        <div class="badge-description">Découvre tous les pays d'Afrique</div>
+                        <div class="badge-progress">0/54</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 ONGLET 4 : COMMENT JOUER
+            ======================================== -->
+            <div class="tab-content" id="helpTab">
+                <div class="help-section">
+                    <h3>🎯 But du jeu</h3>
+                    <p>
+                        Géo Quiz est un jeu éducatif pour apprendre la géographie mondiale ! 
+                        Ton objectif est de découvrir et mémoriser les 195 pays du monde.
+                    </p>
+                </div>
+
+                <div class="help-section">
+                    <h3>🎮 Comment jouer</h3>
+                    <ul>
+                        <li><strong>Choisis une zone :</strong> Monde, Europe, Asie, Afrique, Amérique ou Océanie</li>
+                        <li><strong>Lance le quiz :</strong> On te montre le drapeau et la silhouette d'un pays</li>
+                        <li><strong>Trouve le nom :</strong> Tape le nom du pays pour gagner des points</li>
+                        <li><strong>Collecte les pays :</strong> Chaque pays trouvé est ajouté à ta collection</li>
+                        <li><strong>Débloque des badges :</strong> Atteins des objectifs pour gagner des récompenses</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🏆 Système de badges</h3>
+                    <p>
+                        Gagne des badges en accomplissant des défis ! Plus tu découvres de pays, 
+                        plus tu débloques de badges prestigieux.
+                    </p>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 Astuces</h3>
+                    <ul>
+                        <li>Commence par l'Europe si tu débutes, c'est plus facile !</li>
+                        <li>Observe bien les drapeaux, ils donnent souvent des indices</li>
+                        <li>Retourne régulièrement dans ta collection pour réviser</li>
+                        <li>Essaie de compléter un continent entier pour devenir expert !</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🌍 Géographie</h3>
+                    <p>
+                        Le jeu inclut les <strong>195 pays membres de l'ONU</strong>, répartis sur 5 continents :
+                    </p>
+                    <ul>
+                        <li><strong>Europe :</strong> 45 pays</li>
+                        <li><strong>Asie :</strong> 48 pays</li>
+                        <li><strong>Afrique :</strong> 54 pays</li>
+                        <li><strong>Amérique :</strong> 35 pays</li>
+                        <li><strong>Océanie :</strong> 14 pays</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             ÉCRAN DE JEU
+        ======================================== -->
+        <div class="game-screen" id="gameScreen">
+            <!-- En-tête du jeu -->
+            <div class="game-header">
+                <div class="game-info">
+                    <h2 id="gameTitle">🗺️ Nomme les pays</h2>
+                    <div class="game-stats">
+                        <span class="stat-item">
+                            <strong id="foundCount">0</strong> / <span id="totalCount">0</span>
+                        </span>
+                        <span class="stat-item">
+                            <strong id="gamePercentage">0%</strong>
+                        </span>
+                    </div>
+                </div>
+                <button class="btn-quit" id="quitGameBtn">❌ Quitter</button>
+            </div>
+
+            <!-- Zone de la carte interactive -->
+            <div class="map-container" id="mapContainer">
+                <div class="map-loading">Chargement de la carte...</div>
+            </div>
+
+            <!-- Zone de saisie -->
+            <div class="input-zone">
+                <input 
+                    type="text" 
+                    id="countryInput" 
+                    placeholder="Tape le nom d'un pays..."
+                    autocomplete="off"
+                >
+                <div class="input-feedback" id="inputFeedback"></div>
+            </div>
+
+            <!-- Liste des pays trouvés -->
+            <div class="found-countries">
+                <h3>Pays trouvés</h3>
+                <div class="found-list" id="foundList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de gestion des cartes -->
+    <script src="./map-manager.js"></script>
+
+    <script>
+        // =====================================
+        // DONNÉES GLOBALES
+        // =====================================
+        
+        let currentPlayer = null;
+        let playerData = JSON.parse(localStorage.getItem('geoQuizPlayers')) || {};
+        let countriesData = []; // Sera chargé depuis le JSON
+        let currentGameCountries = []; // Pays de la partie en cours
+        let foundCountries = []; // Pays trouvés dans la partie en cours
+        let currentMap = null; // Instance de InteractiveMap
+
+        // =====================================
+        // CHARGEMENT DES DONNÉES
+        // =====================================
+
+        async function loadCountriesData() {
+            try {
+                const response = await fetch('./countries_fr_complet.json');
+                if (!response.ok) {
+                    throw new Error('Impossible de charger les données des pays');
+                }
+                countriesData = await response.json();
+                console.log(`✅ ${countriesData.length} pays chargés`);
+                updateZoneCounts();
+            } catch (error) {
+                console.error('Erreur chargement des pays:', error);
+                alert('⚠️ Erreur lors du chargement des données. Vérifie que le fichier countries_fr_complet.json est présent.');
+            }
+        }
+
+        function updateZoneCounts() {
+            // Compter les pays par continent
+            const counts = {
+                monde: countriesData.length,
+                europe: countriesData.filter(c => c.continent === 'Europe').length,
+                asie: countriesData.filter(c => c.continent === 'Asie').length,
+                afrique: countriesData.filter(c => c.continent === 'Afrique').length,
+                'amerique-nord': 0, // Sera calculé plus bas
+                'amerique-sud': 0,  // Sera calculé plus bas
+                oceanie: countriesData.filter(c => c.continent === 'Océanie').length
+            };
+
+            // Définir les pays d'Amérique du Nord et du Sud
+            const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
+            const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
+
+            counts['amerique-nord'] = countriesData.filter(c => americaNorthCodes.includes(c.iso2)).length;
+            counts['amerique-sud'] = countriesData.filter(c => americaSouthCodes.includes(c.iso2)).length;
+
+            // Mettre à jour l'affichage
+            document.querySelectorAll('.zone-card').forEach(card => {
+                const zone = card.dataset.zone;
+                const countElement = card.querySelector('.count');
+                if (countElement && counts[zone]) {
+                    countElement.textContent = `${counts[zone]} pays`;
+                }
+            });
+        }
+
+        // =====================================
+        // GESTION DES JOUEURS
+        // =====================================
+
+        function loadPlayers() {
+            const savedPlayersSection = document.getElementById('savedPlayersSection');
+            const playerList = document.getElementById('playerList');
+            
+            const players = Object.keys(playerData);
+            
+            if (players.length > 0) {
+                savedPlayersSection.style.display = 'block';
+                playerList.innerHTML = players.map(name => {
+                    const data = playerData[name];
+                    // Vérifier que collection existe, sinon l'initialiser
+                    if (!data.collection) {
+                        data.collection = [];
+                    }
+                    if (!data.badges) {
+                        data.badges = [];
+                    }
+                    return `
+                        <div class="player-item" onclick="selectPlayer('${name}')">
+                            <div class="name">${name}</div>
+                            <div class="stats">
+                                ${data.collection.length} pays découverts
+                            </div>
+                            <button class="delete-btn" onclick="event.stopPropagation(); deletePlayer('${name}')">
+                                Supprimer
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                savedPlayersSection.style.display = 'none';
+            }
+        }
+
+        function createPlayer() {
+            const nameInput = document.getElementById('playerNameInput');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('⚠️ Entre ton prénom pour commencer !');
+                return;
+            }
+            
+            if (!playerData[name]) {
+                playerData[name] = {
+                    collection: ['FR', 'BE', 'DE'], // Quelques pays de test
+                    badges: ['first'], // Badge de test
+                    createdAt: new Date().toISOString()
+                };
+                savePlayerData();
+            }
+            
+            selectPlayer(name);
+        }
+
+        function selectPlayer(name) {
+            currentPlayer = name;
+            
+            // Masquer l'écran de sélection
+            document.getElementById('playerSelectionScreen').classList.add('hidden');
+            
+            // Afficher l'écran principal
+            document.getElementById('configScreen').classList.remove('hidden');
+            
+            // Mettre à jour l'interface
+            updatePlayerUI();
+        }
+
+        function deletePlayer(name) {
+            if (confirm(`Supprimer le profil de ${name} ?`)) {
+                delete playerData[name];
+                savePlayerData();
+                loadPlayers();
+            }
+        }
+
+        function updatePlayerUI() {
+            document.getElementById('currentPlayerName').textContent = currentPlayer;
+            
+            // Vérifier que les données du joueur existent
+            if (!playerData[currentPlayer]) {
+                playerData[currentPlayer] = {
+                    collection: ['FR', 'BE', 'DE'], // Quelques pays de test
+                    badges: ['first'], // Badge de test
+                    createdAt: new Date().toISOString()
+                };
+                savePlayerData();
+            }
+            
+            const data = playerData[currentPlayer];
+            document.getElementById('playerCollectionCount').textContent = data.collection.length;
+            document.getElementById('playerBadgeCount').textContent = data.badges.length;
+            
+            // Mettre à jour la collection
+            updateCollectionDisplay();
+            
+            // Mettre à jour les badges
+            updateBadgesDisplay();
+        }
+
+        function savePlayerData() {
+            localStorage.setItem('geoQuizPlayers', JSON.stringify(playerData));
+        }
+
+        // =====================================
+        // SYSTÈME D'ONGLETS
+        // =====================================
+
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.dataset.tab;
+                    
+                    // Retirer la classe active de tous les onglets
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // Activer l'onglet cliqué
+                    tab.classList.add('active');
+                    document.getElementById(`${targetTab}Tab`).classList.add('active');
+                });
+            });
+        }
+
+        // =====================================
+        // SÉLECTION DE ZONE
+        // =====================================
+
+        let selectedZone = null;
+
+        function initZoneSelection() {
+            const zoneCards = document.querySelectorAll('.zone-card');
+            
+            zoneCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Désélectionner toutes les cartes
+                    zoneCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Sélectionner la carte cliquée
+                    card.classList.add('selected');
+                    selectedZone = card.dataset.zone;
+                });
+            });
+        }
+
+        // =====================================
+        // COLLECTION
+        // =====================================
+
+        function updateCollectionDisplay() {
+            if (!currentPlayer || !playerData[currentPlayer]) {
+                return;
+            }
+            
+            // Cette fonction sera implémentée avec les données des pays
+            // Pour l'instant, on affiche juste un message
+            const grid = document.getElementById('collectionGrid');
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
+                    <p style="font-size: 1.2em;">La collection sera affichée ici avec les données des pays.</p>
+                    <p style="margin-top: 10px;">📚 Tu as découvert <strong>${playerData[currentPlayer].collection.length}</strong> pays !</p>
+                </div>
+            `;
+        }
+
+        // =====================================
+        // BADGES
+        // =====================================
+
+        function updateBadgesDisplay() {
+            if (!currentPlayer || !playerData[currentPlayer]) {
+                return;
+            }
+            
+            const count = playerData[currentPlayer].collection.length;
+            const badges = document.querySelectorAll('.badge-card');
+            
+            const badgeThresholds = {
+                'first': 1,
+                'explorer': 10,
+                'adventurer': 25,
+                'traveler': 50,
+                'master': 100,
+                'complete': 195
+            };
+            
+            badges.forEach(badge => {
+                const badgeType = badge.dataset.badge;
+                const threshold = badgeThresholds[badgeType];
+                
+                if (threshold && count >= threshold) {
+                    badge.classList.add('unlocked');
+                    badge.querySelector('.badge-progress').textContent = `✓ Débloqué !`;
+                } else if (threshold) {
+                    badge.querySelector('.badge-progress').textContent = `${count}/${threshold}`;
+                }
+            });
+        }
+
+        // =====================================
+        // DÉMARRAGE DU JEU
+        // =====================================
+
+        function normalizeString(str) {
+            // Normaliser pour la comparaison (enlever accents, minuscules, etc.)
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/['']/g, '')
+                .trim();
+        }
+
+        async function startGame() {
+            if (!selectedZone) {
+                alert('⚠️ Choisis d\'abord une zone géographique !');
+                return;
+            }
+
+            if (countriesData.length === 0) {
+                alert('⚠️ Les données des pays ne sont pas encore chargées. Attends quelques secondes...');
+                return;
+            }
+
+            // Définir les pays d'Amérique du Nord et du Sud
+            const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
+            const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
+
+            // Filtrer les pays selon la zone
+            if (selectedZone === 'monde') {
+                currentGameCountries = [...countriesData];
+            } else if (selectedZone === 'amerique-nord') {
+                currentGameCountries = countriesData.filter(c => americaNorthCodes.includes(c.iso2));
+            } else if (selectedZone === 'amerique-sud') {
+                currentGameCountries = countriesData.filter(c => americaSouthCodes.includes(c.iso2));
+            } else {
+                const continentMap = {
+                    'europe': 'Europe',
+                    'asie': 'Asie',
+                    'afrique': 'Afrique',
+                    'oceanie': 'Océanie'
+                };
+                const continent = continentMap[selectedZone];
+                currentGameCountries = countriesData.filter(c => c.continent === continent);
+            }
+
+            foundCountries = [];
+
+            // Nom de la zone pour l'affichage
+            const zoneNames = {
+                'monde': 'Monde',
+                'europe': 'Europe',
+                'asie': 'Asie',
+                'afrique': 'Afrique',
+                'amerique-nord': 'Amérique du Nord',
+                'amerique-sud': 'Amérique du Sud',
+                'oceanie': 'Océanie'
+            };
+
+            // Mettre à jour l'interface
+            document.getElementById('gameTitle').textContent = `🗺️ Nomme les pays - ${zoneNames[selectedZone]}`;
+            document.getElementById('foundCount').textContent = '0';
+            document.getElementById('totalCount').textContent = currentGameCountries.length;
+            document.getElementById('gamePercentage').textContent = '0%';
+            document.getElementById('foundList').innerHTML = '';
+            document.getElementById('countryInput').value = '';
+            document.getElementById('inputFeedback').classList.remove('show');
+
+            // Masquer l'écran de config, afficher l'écran de jeu
+            document.getElementById('configScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('active');
+
+            // Charger la carte SVG
+            await loadGameMap();
+
+            // Focus sur l'input
+            document.getElementById('countryInput').focus();
+        }
+
+        async function loadGameMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            
+            // Créer une instance de la carte interactive
+            if (typeof InteractiveMap === 'undefined') {
+                mapContainer.innerHTML = '<div class="map-loading">⚠️ Le script map-manager.js n\'est pas chargé</div>';
+                return;
+            }
+
+            // Mapper les zones vers les fichiers SVG
+            const zoneToSvg = {
+                'monde': 'monde',
+                'europe': 'europe',
+                'asie': 'asie',
+                'afrique': 'afrique',
+                'amerique-nord': 'amerique-nord',
+                'amerique-sud': 'amerique-sud',
+                'oceanie': 'oceanie'
+            };
+
+            const svgZone = zoneToSvg[selectedZone] || selectedZone;
+            currentMap = new InteractiveMap('mapContainer', svgZone);
+            await currentMap.init();
+        }
+
+        function checkCountry() {
+            const input = document.getElementById('countryInput');
+            const feedback = document.getElementById('inputFeedback');
+            const guess = input.value.trim();
+
+            if (!guess) return;
+
+            const normalizedGuess = normalizeString(guess);
+
+            // Chercher le pays
+            const country = currentGameCountries.find(c => {
+                const normalizedName = normalizeString(c.nom);
+                return normalizedName === normalizedGuess;
+            });
+
+            if (country) {
+                // Vérifier si déjà trouvé
+                if (foundCountries.includes(country.iso2)) {
+                    feedback.textContent = `✅ ${country.nom} est déjà trouvé !`;
+                    feedback.className = 'input-feedback show incorrect';
+                    input.value = '';
+                    
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                    }, 2000);
+                    return;
+                }
+
+                // CORRECT !
+                foundCountries.push(country.iso2);
+                
+                // Colorer sur la carte
+                if (currentMap) {
+                    currentMap.colorCountry(country.nom);
+                }
+
+                // Ajouter à la collection du joueur
+                if (!playerData[currentPlayer].collection.includes(country.iso2)) {
+                    playerData[currentPlayer].collection.push(country.iso2);
+                    savePlayerData();
+                }
+
+                // Feedback positif
+                feedback.textContent = `✅ Bravo ! ${country.nom} 🎉`;
+                feedback.className = 'input-feedback show correct';
+
+                // Ajouter à la liste
+                addToFoundList(country);
+
+                // Mettre à jour les stats
+                updateGameStats();
+
+                input.value = '';
+
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+
+                // Vérifier si terminé
+                if (foundCountries.length === currentGameCountries.length) {
+                    setTimeout(() => {
+                        alert(`🎊 BRAVO ! Tu as trouvé tous les ${currentGameCountries.length} pays !\n\n🏆 Félicitations champion(ne) !`);
+                    }, 500);
+                }
+
+            } else {
+                // INCORRECT
+                feedback.textContent = `❌ "${guess}" n'est pas reconnu ou n'est pas dans cette zone`;
+                feedback.className = 'input-feedback show incorrect';
+                input.value = '';
+
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        function addToFoundList(country) {
+            const foundList = document.getElementById('foundList');
+            const item = document.createElement('div');
+            item.className = 'found-item';
+            item.innerHTML = `
+                <span class="flag">${country.flag ? '🏴' : '🚩'}</span>
+                <span>${country.nom}</span>
+            `;
+            foundList.appendChild(item);
+        }
+
+        function updateGameStats() {
+            document.getElementById('foundCount').textContent = foundCountries.length;
+            const percentage = Math.round((foundCountries.length / currentGameCountries.length) * 100);
+            document.getElementById('gamePercentage').textContent = percentage + '%';
+        }
+
+        function quitGame() {
+            if (confirm('Quitter la partie en cours ?')) {
+                document.getElementById('gameScreen').classList.remove('active');
+                document.getElementById('configScreen').classList.remove('hidden');
+                
+                // Mettre à jour l'interface du joueur
+                updatePlayerUI();
+            }
+        }
+
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        document.getElementById('quitGameBtn').addEventListener('click', quitGame);
+        
+        document.getElementById('countryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkCountry();
+            }
+        });
+
+        // =====================================
+        // CHANGEMENT DE JOUEUR
+        // =====================================
+
+        document.getElementById('changePlayerBtn').addEventListener('click', () => {
+            if (confirm('Retourner à la sélection de joueur ?')) {
+                currentPlayer = null;
+                document.getElementById('configScreen').classList.add('hidden');
+                document.getElementById('playerSelectionScreen').classList.remove('hidden');
+            }
+        });
+
+        // =====================================
+        // INITIALISATION
+        // =====================================
+
+        document.getElementById('createPlayerBtn').addEventListener('click', createPlayer);
+        
+        document.getElementById('playerNameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                createPlayer();
+            }
+        });
+
+        // Initialiser au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPlayers();
+            initTabs();
+            initZoneSelection();
+            loadCountriesData(); // Charger les données des pays
+            
+            // Service Worker désactivé en développement
+            // Décommenter pour activer le mode hors ligne :
+            /*
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            }
+            */
+        });
+    </script>
+</body>
+</html>

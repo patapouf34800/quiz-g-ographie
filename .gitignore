@@ -1,0 +1,17 @@
+# Fichiers de développement
+*.zip
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Fichiers de backup
+*.bak
+*~
+
+# Logs
+*.log
+
+# Fichiers temporaires
+*.tmp
+temp/
