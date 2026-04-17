@@ -1023,6 +1023,14 @@
             display: block;
         }
 
+        /* Style spécial pour l'écran de jeu population (en dehors du container) */
+        #populationGameScreen.active {
+            background: white;
+            min-height: 100vh;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
         .game-header {
             background: linear-gradient(135deg, #00838F, #00ACC1);
             color: white;
@@ -2297,65 +2305,66 @@
             </div>
         </div>
 
-        <!-- ========================================
-             ÉCRAN DE JEU - LIMITE POPULATION
-        ======================================== -->
-        <div class="game-screen hidden" id="populationGameScreen">
-            <!-- En-tête du jeu -->
-            <div class="game-header">
-                <div class="game-info">
-                    <h2 id="populationGameTitle">👥 Ne dépasse pas la limite !</h2>
-                    <div class="game-stats">
-                        <span class="stat-item">
-                            Difficulté : <strong id="currentDifficulty">Facile</strong>
-                        </span>
-                    </div>
-                </div>
-                <div class="game-buttons">
-                    <button class="btn-quit" id="quitPopulationGameBtn">❌ Quitter</button>
+    </div>
+
+    <!-- ========================================
+         ÉCRAN DE JEU - LIMITE POPULATION (en dehors du container)
+    ======================================== -->
+    <div class="game-screen hidden" id="populationGameScreen">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="game-info">
+                <h2 id="populationGameTitle">👥 Ne dépasse pas la limite !</h2>
+                <div class="game-stats">
+                    <span class="stat-item">
+                        Difficulté : <strong id="currentDifficulty">Facile</strong>
+                    </span>
                 </div>
             </div>
+            <div class="game-buttons">
+                <button class="btn-quit" id="quitPopulationGameBtn">❌ Quitter</button>
+            </div>
+        </div>
 
-            <!-- Compteur de population -->
-            <div class="population-counter">
-                <div class="population-display">
-                    <div class="current-population">
-                        <span class="label">Population actuelle</span>
-                        <span class="value" id="currentPopulation">0</span>
-                        <span class="unit">millions</span>
-                    </div>
-                    <div class="population-separator">/</div>
-                    <div class="target-population">
-                        <span class="label">Objectif</span>
-                        <span class="value" id="targetPopulation">0</span>
-                        <span class="unit">millions</span>
-                    </div>
+        <!-- Compteur de population -->
+        <div class="population-counter">
+            <div class="population-display">
+                <div class="current-population">
+                    <span class="label">Population actuelle</span>
+                    <span class="value" id="currentPopulation">0</span>
+                    <span class="unit">millions</span>
                 </div>
-                <div class="population-bar">
-                    <div class="population-progress" id="populationProgress"></div>
-                </div>
-                <div class="population-remaining">
-                    Reste : <strong id="remainingPopulation">0</strong> millions
+                <div class="population-separator">/</div>
+                <div class="target-population">
+                    <span class="label">Objectif</span>
+                    <span class="value" id="targetPopulation">0</span>
+                    <span class="unit">millions</span>
                 </div>
             </div>
-
-            <!-- Catégories de pays par population -->
-            <div class="population-categories">
-                <h3>📊 Sélectionne un pays par catégorie</h3>
-                <div class="categories-grid" id="categoriesGrid">
-                    <!-- Les catégories seront générées dynamiquement -->
-                </div>
+            <div class="population-bar">
+                <div class="population-progress" id="populationProgress"></div>
             </div>
+            <div class="population-remaining">
+                Reste : <strong id="remainingPopulation">0</strong> millions
+            </div>
+        </div>
 
-            <!-- Pays sélectionnés -->
-            <div class="selected-countries">
-                <div class="selected-header">
-                    <h3>Pays sélectionnés (<span id="selectedCount">0</span>)</h3>
-                    <button class="btn-stop-game" id="stopGameBtn">🛑 Je m'arrête là !</button>
-                </div>
-                <div class="selected-list" id="selectedList">
-                    <p class="empty-message">Aucun pays sélectionné pour le moment</p>
-                </div>
+        <!-- Catégories de pays par population -->
+        <div class="population-categories">
+            <h3>📊 Sélectionne un pays par catégorie</h3>
+            <div class="categories-grid" id="categoriesGrid">
+                <!-- Les catégories seront générées dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Pays sélectionnés -->
+        <div class="selected-countries">
+            <div class="selected-header">
+                <h3>Pays sélectionnés (<span id="selectedCount">0</span>)</h3>
+                <button class="btn-stop-game" id="stopGameBtn">🛑 Je m'arrête là !</button>
+            </div>
+            <div class="selected-list" id="selectedList">
+                <p class="empty-message">Aucun pays sélectionné pour le moment</p>
             </div>
         </div>
     </div>
@@ -3712,6 +3721,21 @@
                 return;
             }
 
+            // Réinitialiser les boutons au début du jeu
+            const abandonBtn = document.getElementById('abandonGameBtn');
+            const quitBtn = document.getElementById('quitGameBtn');
+            
+            if (abandonBtn) {
+                abandonBtn.style.display = 'inline-block';
+                abandonBtn.disabled = false;
+            }
+            
+            if (quitBtn) {
+                quitBtn.textContent = '❌ Quitter';
+                quitBtn.style.display = 'inline-block';
+                quitBtn.disabled = false;
+            }
+
             // Définir les pays d'Amérique du Nord et du Sud
             const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
             const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
@@ -4579,7 +4603,13 @@
         }
 
         function abandonGame() {
+            console.log('🏳️ abandonGame() appelée');
+            console.log('Mode actuel:', selectedMode);
+            console.log('Pays trouvés:', foundCountries.length);
+            
             if (confirm('🏳️ Abandonner la partie ?\n\nTa progression actuelle sera comptabilisée et les pays manquants seront révélés.')) {
+                console.log('✅ Confirmation abandon');
+                
                 // Sauvegarder la progression actuelle dans la collection
                 saveCurrentProgress();
                 
@@ -4611,8 +4641,20 @@
                 }
                 
                 // Masquer les boutons d'action
-                document.getElementById('abandonGameBtn').style.display = 'none';
-                document.getElementById('quitGameBtn').textContent = '← Retour au menu';
+                const abandonBtn = document.getElementById('abandonGameBtn');
+                const quitBtn = document.getElementById('quitGameBtn');
+                
+                if (abandonBtn) {
+                    abandonBtn.style.display = 'none';
+                }
+                
+                if (quitBtn) {
+                    quitBtn.textContent = '← Retour au menu';
+                }
+                
+                console.log('✅ Abandon terminé');
+            } else {
+                console.log('❌ Abandon annulé');
             }
         }
 
