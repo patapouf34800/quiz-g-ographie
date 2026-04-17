@@ -4906,18 +4906,28 @@
         function startPopulationGame() {
             console.log('🎮 Démarrage du jeu limite-population');
             
-            // Masquer l'écran de configuration
+            // Masquer l'écran de configuration et le container principal
             document.getElementById('difficultySelectionScreen').classList.add('hidden');
+            document.querySelector('.container').style.display = 'none';
             
             // Afficher l'écran de jeu population
             const gameScreen = document.getElementById('populationGameScreen');
             gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('active');
             
             // Initialiser le jeu
             initPopulationGame();
         }
 
         function initPopulationGame() {
+            // Vérifier que les données sont chargées
+            if (!countriesData || countriesData.length === 0) {
+                console.error('❌ Les données des pays ne sont pas encore chargées');
+                alert('⚠️ Erreur: les données ne sont pas chargées. Recharge la page.');
+                quitPopulationGame();
+                return;
+            }
+            
             // Réinitialiser l'état du jeu
             populationGameState.selectedCountries = [];
             populationGameState.currentPopulation = 0;
@@ -5122,7 +5132,12 @@
 
         function quitPopulationGame() {
             // Masquer l'écran de jeu
-            document.getElementById('populationGameScreen').classList.add('hidden');
+            const gameScreen = document.getElementById('populationGameScreen');
+            gameScreen.classList.add('hidden');
+            gameScreen.classList.remove('active');
+            
+            // Réafficher le container principal
+            document.querySelector('.container').style.display = 'block';
             
             // Afficher l'écran de configuration
             document.getElementById('difficultySelectionScreen').classList.remove('hidden');
