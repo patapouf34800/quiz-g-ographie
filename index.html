@@ -1995,29 +1995,51 @@
             return allCountries.size;
         }
 
-        function updateCollectionDisplay() {
+        // Variable pour stocker le filtre de continent actuel
+        let currentContinentFilter = 'tous';
+
+        function updateCollectionDisplay(filterContinent = currentContinentFilter) {
             if (!currentPlayer || !playerData[currentPlayer]) {
                 return;
             }
+            
+            currentContinentFilter = filterContinent;
             
             const grid = document.getElementById('collectionGrid');
             const stats = playerData[currentPlayer].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
             const nommePaysStats = stats['nomme-pays'] || {};
             
+            // Filtrer les pays par continent
+            let filteredCountries = [...countriesData];
+            if (filterContinent !== 'tous') {
+                const continentMap = {
+                    'europe': 'Europe',
+                    'asie': 'Asie',
+                    'afrique': 'Afrique',
+                    'amérique': 'Amérique',
+                    'océanie': 'Océanie'
+                };
+                const continentName = continentMap[filterContinent];
+                filteredCountries = countriesData.filter(c => c.continent === continentName);
+            }
+            
             // Trier les pays par continent puis par nom
-            const sortedCountries = [...countriesData].sort((a, b) => {
-                if (a.continent !== b.continent) {
+            const sortedCountries = filteredCountries.sort((a, b) => {
+                if (filterContinent === 'tous' && a.continent !== b.continent) {
                     return a.continent.localeCompare(b.continent, 'fr');
                 }
                 return a.nom.localeCompare(b.nom, 'fr');
             });
             
+            // Mettre à jour les compteurs des onglets
+            updateContinentTabs(nommePaysStats);
+            
             let html = '';
             let currentContinent = '';
             
             sortedCountries.forEach(country => {
-                // Ajouter un titre de continent si on change de continent
-                if (country.continent !== currentContinent) {
+                // Ajouter un titre de continent si on change de continent (mode "tous" uniquement)
+                if (filterContinent === 'tous' && country.continent !== currentContinent) {
                     if (currentContinent !== '') {
                         html += '</div>'; // Fermer la div du continent précédent
                     }
@@ -2055,6 +2077,67 @@
             });
             
             grid.innerHTML = html;
+            
+            // Mettre à jour les stats globales
+            const discoveredCount = countDiscoveredCountries();
+            document.getElementById('collectionTotal').textContent = discoveredCount;
+            document.getElementById('collectionPercentage').textContent = Math.round((discoveredCount / 195) * 100) + '%';
+        }
+
+        function updateContinentTabs(nommePaysStats) {
+            // Compter les pays découverts par continent
+            const continentCounts = {
+                'tous': { found: 0, total: 195 },
+                'europe': { found: 0, total: 0 },
+                'asie': { found: 0, total: 0 },
+                'afrique': { found: 0, total: 0 },
+                'amérique': { found: 0, total: 0 },
+                'océanie': { found: 0, total: 0 }
+            };
+            
+            countriesData.forEach(country => {
+                const continentKey = country.continent.toLowerCase();
+                if (continentCounts[continentKey]) {
+                    continentCounts[continentKey].total++;
+                }
+                
+                if (nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0) {
+                    continentCounts['tous'].found++;
+                    if (continentCounts[continentKey]) {
+                        continentCounts[continentKey].found++;
+                    }
+                }
+            });
+            
+            // Mettre à jour l'affichage des onglets
+            Object.keys(continentCounts).forEach(continent => {
+                const tab = document.querySelector(`.continent-tab[data-continent="${continent}"]`);
+                if (tab) {
+                    const countSpan = tab.querySelector('.count');
+                    if (countSpan) {
+                        const { found, total } = continentCounts[continent];
+                        countSpan.textContent = `${found}/${total}`;
+                    }
+                }
+            });
+        }
+
+        // Initialiser les événements de clic sur les onglets de continent
+        function initContinentTabs() {
+            const tabs = document.querySelectorAll('.continent-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Retirer la classe active de tous les onglets
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Ajouter la classe active à l'onglet cliqué
+                    tab.classList.add('active');
+                    
+                    // Filtrer par continent
+                    const continent = tab.dataset.continent;
+                    updateCollectionDisplay(continent);
+                });
+            });
         }
 
         // =====================================
@@ -3267,6 +3350,7 @@
             initTabs();
             initModeSelection(); // Initialiser la sélection de mode
             initZoneSelection();
+            initContinentTabs(); // Initialiser les onglets de filtrage par continent
             loadCountriesData(); // Charger les données des pays
             
             // Service Worker désactivé en développement
