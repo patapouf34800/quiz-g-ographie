@@ -1595,7 +1595,25 @@
         try {
             const stored = localStorage.getItem('geoQuizPlayers');
             console.log('🔍 localStorage brut:', stored);
-            playerData = stored ? JSON.parse(stored) : {};
+            
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                
+                // Vérifier si c'est un Array (ancien format) au lieu d'un Object
+                if (Array.isArray(parsed)) {
+                    console.warn('⚠️ Ancien format détecté (Array). Conversion en Object...');
+                    playerData = {};
+                    localStorage.setItem('geoQuizPlayers', JSON.stringify(playerData));
+                } else if (typeof parsed === 'object' && parsed !== null) {
+                    playerData = parsed;
+                } else {
+                    console.warn('⚠️ Format invalide. Réinitialisation...');
+                    playerData = {};
+                }
+            } else {
+                playerData = {};
+            }
+            
             console.log('✅ playerData chargé:', playerData);
             console.log('📊 Nombre de joueurs:', Object.keys(playerData).length);
         } catch (error) {
@@ -1826,6 +1844,7 @@
                 try {
                     const parsed = JSON.parse(stored);
                     console.log('✅ Parsed data:', parsed);
+                    console.log('📝 Type:', Array.isArray(parsed) ? 'Array ❌' : 'Object ✅');
                     console.log('👥 Nombre de joueurs:', Object.keys(parsed).length);
                     
                     Object.keys(parsed).forEach(playerName => {
@@ -1853,6 +1872,17 @@
             
             console.log('\n💾 État actuel de playerData:', playerData);
             console.log('========================\n');
+        };
+
+        // 🧹 Fonction pour nettoyer le localStorage corrompu
+        window.cleanStorage = function() {
+            if (confirm('⚠️ Nettoyer le localStorage ?\n\nCela supprimera tous les profils corrompus.')) {
+                localStorage.removeItem('geoQuizPlayers');
+                playerData = {};
+                console.log('✅ localStorage nettoyé !');
+                console.log('🔄 Rechargez la page pour repartir à zéro.');
+                location.reload();
+            }
         };
 
         // 📊 Fonction utile pour voir les stats détaillées dans la console
