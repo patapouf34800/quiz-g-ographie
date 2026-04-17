@@ -618,41 +618,37 @@
             position: absolute;
             top: 6px;
             right: 6px;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 3px;
+            border-radius: 50%;
             font-weight: bold;
-            font-size: 0.7em;
-            color: white;
+            font-size: 1em;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             z-index: 10;
         }
 
         .capital-ribbon.bronze {
-            background: linear-gradient(135deg, #CD7F32 0%, #A0522D 100%);
-            border: 1.5px solid #8B4513;
+            background: transparent;
         }
 
         .capital-ribbon.silver {
-            background: linear-gradient(135deg, #E8E8E8 0%, #A8A8A8 100%);
-            border: 1.5px solid #909090;
+            background: transparent;
         }
 
         .capital-ribbon.gold {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            border: 1.5px solid #DAA520;
+            background: transparent;
             animation: goldGlow 2s ease-in-out infinite;
         }
 
         @keyframes goldGlow {
             0%, 100% {
-                box-shadow: 0 2px 5px rgba(255, 215, 0, 0.5);
+                transform: scale(1);
             }
             50% {
-                box-shadow: 0 3px 10px rgba(255, 215, 0, 0.8);
+                transform: scale(1.1);
             }
         }
 
@@ -2701,13 +2697,13 @@
                 
                 if (expertCount >= 6) {
                     // Or : Expert 6+ (priorité absolue)
-                    capitalRibbon = '<div class="capital-ribbon gold"><span>C</span></div>';
+                    capitalRibbon = '<div class="capital-ribbon gold">🥇</div>';
                 } else if (totalCapitalesCount >= 6) {
                     // Argent : (Capitales + Expert) 6+
-                    capitalRibbon = '<div class="capital-ribbon silver"><span>C</span></div>';
+                    capitalRibbon = '<div class="capital-ribbon silver">🥈</div>';
                 } else if (totalCapitalesCount >= 1) {
                     // Bronze : (Capitales + Expert) 1-5
-                    capitalRibbon = '<div class="capital-ribbon bronze"><span>C</span></div>';
+                    capitalRibbon = '<div class="capital-ribbon bronze">🥉</div>';
                 }
                 
                 html += `
