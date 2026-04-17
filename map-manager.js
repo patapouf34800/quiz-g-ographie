@@ -43,15 +43,15 @@ const COUNTRY_CODES = {
   'Égypte': 'EG', 'Libye': 'LY', 'Tunisie': 'TN', 'Algérie': 'DZ', 'Maroc': 'MA',
   'Soudan': 'SD', 'Soudan du Sud': 'SS', 'Éthiopie': 'ET', 'Érythrée': 'ER', 'Somalie': 'SO',
   'Djibouti': 'DJ', 'Kenya': 'KE', 'Tanzanie': 'TZ', 'Ouganda': 'UG', 'Rwanda': 'RW',
-  'Burundi': 'BI', 'Nigeria': 'NG', 'Niger': 'NE', 'Tchad': 'TD', 'Cameroun': 'CM',
+  'Burundi': 'BI', 'Nigéria': 'NG', 'Niger': 'NE', 'Tchad': 'TD', 'Cameroun': 'CM',
   'République centrafricaine': 'CF', 'Guinée équatoriale': 'GQ', 'Gabon': 'GA', 'Congo': 'CG',
   'République démocratique du Congo': 'CD', 'Angola': 'AO', 'Zambie': 'ZM', 'Zimbabwe': 'ZW',
   'Mozambique': 'MZ', 'Malawi': 'MW', 'Afrique du Sud': 'ZA', 'Lesotho': 'LS', 'Eswatini': 'SZ',
   'Namibie': 'NA', 'Botswana': 'BW', 'Madagascar': 'MG', 'Maurice': 'MU', 'Comores': 'KM',
   'Seychelles': 'SC', 'Ghana': 'GH', 'Togo': 'TG', 'Bénin': 'BJ', 'Burkina Faso': 'BF',
   'Mali': 'ML', 'Mauritanie': 'MR', 'Sénégal': 'SN', 'Gambie': 'GM', 'Guinée-Bissau': 'GW',
-  'Guinée': 'GN', 'Sierra Leone': 'SL', 'Liberia': 'LR', 'Côte d\'Ivoire': 'CI',
-  'Cap-Vert': 'CV', 'São Tomé-et-Principe': 'ST',
+  'Guinée': 'GN', 'Sierra Leone': 'SL', 'Libéria': 'LR', 'Côte d\'Ivoire': 'CI',
+  'Cap-Vert': 'CV', 'São Tomé-et-Príncipe': 'ST',
   
   // Océanie
   'Australie': 'AU', 'Nouvelle-Zélande': 'NZ', 'Papouasie-Nouvelle-Guinée': 'PG',
