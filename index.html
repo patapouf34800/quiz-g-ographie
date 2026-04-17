@@ -613,7 +613,7 @@
             color: #333;
         }
 
-        /* Ruban de capitale */
+        /* Ruban de capitale (coin haut droit) */
         .capital-ribbon {
             position: absolute;
             top: 6px;
@@ -641,6 +641,28 @@
         .capital-ribbon.gold {
             background: transparent;
             animation: goldGlow 2s ease-in-out infinite;
+        }
+
+        /* Badge drapeaux (coin haut gauche) */
+        .flag-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            z-index: 10;
+        }
+
+        .flag-badge.basic {
+            opacity: 0.7;
+        }
+
+        .flag-badge.expert {
+            opacity: 1;
         }
 
         @keyframes goldGlow {
@@ -1377,12 +1399,8 @@
             display: none;
         }
 
-        .flag-item.found .flag-answer,
         .flag-item.revealed .flag-answer {
             display: block;
-        }
-
-        .flag-item.revealed .flag-answer {
             color: #D97706;
         }
 
@@ -2629,10 +2647,11 @@
             currentContinentFilter = filterContinent;
             
             const grid = document.getElementById('collectionGrid');
-            const stats = playerData[currentPlayer].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
+            const stats = playerData[currentPlayer].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {}, 'drapeaux': {} };
             const nommePaysStats = stats['nomme-pays'] || {};
             const capitalesStats = stats['capitales'] || {};
             const expertStats = stats['expert'] || {};
+            const drapeauxStats = stats['drapeaux'] || {};
             
             // Filtrer les pays par continent
             let filteredCountries = [...countriesData];
@@ -2706,6 +2725,16 @@
                     capitalRibbon = '<div class="capital-ribbon bronze">🥉</div>';
                 }
                 
+                // Déterminer l'indicateur drapeaux (coin haut gauche)
+                const drapeauxCount = drapeauxStats[country.iso2] || 0;
+                let drapeauxBadge = '';
+                
+                if (drapeauxCount > 5) {
+                    drapeauxBadge = '<div class="flag-badge expert">🚩</div>';
+                } else if (drapeauxCount >= 1) {
+                    drapeauxBadge = '<div class="flag-badge basic">🏴</div>';
+                }
+                
                 html += `
                     <div class="country-card ${!isDiscovered ? 'not-discovered' : ''} ${isMastered ? 'mastered' : ''}" title="${country.nom}" data-iso="${country.iso2}">
                         <div class="flag-container">
@@ -2719,6 +2748,7 @@
                                 ${country.iso2}
                             </div>
                         </div>
+                        ${drapeauxBadge}
                         ${capitalRibbon}
                         <div class="country-name" style="font-size: 0.85em; text-align: center; margin-top: 5px;">
                             ${country.nom}
@@ -4062,6 +4092,7 @@
                 // CORRECT !
                 const flagItem = input.closest('.flag-item');
                 flagItem.classList.add('found');
+                input.value = '✓';
                 input.disabled = true;
                 
                 // Ajouter à foundCountries si pas déjà présent
