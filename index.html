@@ -617,7 +617,7 @@
         .capital-ribbon {
             position: absolute;
             top: 8px;
-            right: 18px;
+            right: 4px;
             width: 22px;
             height: 22px;
             display: flex;
@@ -647,7 +647,7 @@
         .flag-badge {
             position: absolute;
             top: 8px;
-            left: 28px;
+            left: 4px;
             width: 22px;
             height: 22px;
             display: flex;
@@ -2376,7 +2376,7 @@
                 return;
             }
             
-            const stats = playerData[playerName].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
+            const stats = playerData[playerName].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {}, 'drapeaux': {} };
             console.log(`\n📊 ═══════════════════════════════════`);
             console.log(`   Stats de ${playerName}`);
             console.log(`═══════════════════════════════════\n`);
