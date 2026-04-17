@@ -546,9 +546,28 @@
 
         .collection-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .country-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .country-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 172, 193, 0.3);
+            border-color: #00ACC1;
         }
 
         .country-card-collection {
@@ -1664,8 +1683,12 @@
             
             if (!playerData[name]) {
                 playerData[name] = {
-                    collection: ['FR', 'BE', 'DE'], // Quelques pays de test
-                    badges: ['first'], // Badge de test
+                    stats: {
+                        'nomme-pays': {},      // {iso2: count}
+                        'capitales': {},       // {iso2: count}
+                        'expert': {}           // {iso2: count}
+                    },
+                    badges: [],
                     createdAt: new Date().toISOString()
                 };
                 savePlayerData();
@@ -1701,15 +1724,29 @@
             // Vérifier que les données du joueur existent
             if (!playerData[currentPlayer]) {
                 playerData[currentPlayer] = {
-                    collection: ['FR', 'BE', 'DE'], // Quelques pays de test
-                    badges: ['first'], // Badge de test
+                    stats: {
+                        'nomme-pays': {},
+                        'capitales': {},
+                        'expert': {}
+                    },
+                    badges: [],
                     createdAt: new Date().toISOString()
                 };
                 savePlayerData();
             }
             
+            // Initialiser stats si nécessaire (rétrocompatibilité)
+            if (!playerData[currentPlayer].stats) {
+                playerData[currentPlayer].stats = {
+                    'nomme-pays': {},
+                    'capitales': {},
+                    'expert': {}
+                };
+            }
+            
+            const discoveredCount = countDiscoveredCountries();
             const data = playerData[currentPlayer];
-            document.getElementById('playerCollectionCount').textContent = data.collection.length;
+            document.getElementById('playerCollectionCount').textContent = discoveredCount;
             document.getElementById('playerBadgeCount').textContent = data.badges.length;
             
             // Mettre à jour la collection
@@ -1722,6 +1759,66 @@
         function savePlayerData() {
             localStorage.setItem('geoQuizPlayers', JSON.stringify(playerData));
         }
+
+        // 📊 Fonction utile pour voir les stats détaillées dans la console
+        // Usage: showPlayerStats() ou showPlayerStats('Alice')
+        window.showPlayerStats = function(playerName = currentPlayer) {
+            if (!playerData[playerName]) {
+                console.log('❌ Joueur non trouvé');
+                return;
+            }
+            
+            const stats = playerData[playerName].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
+            console.log(`\n📊 ═══════════════════════════════════`);
+            console.log(`   Stats de ${playerName}`);
+            console.log(`═══════════════════════════════════\n`);
+            
+            console.log(`🗺️  Mode "Nomme les pays":`);
+            const nommePaysEntries = Object.entries(stats['nomme-pays']).sort((a, b) => b[1] - a[1]);
+            if (nommePaysEntries.length === 0) {
+                console.log(`   Aucun pays trouvé`);
+            } else {
+                nommePaysEntries.forEach(([iso2, count]) => {
+                    const country = countriesData.find(c => c.iso2 === iso2);
+                    console.log(`   ${count}x - ${country ? country.nom : iso2}`);
+                });
+            }
+            
+            console.log(`\n🏛️  Mode "Capitales":`);
+            const capitalesEntries = Object.entries(stats['capitales']).sort((a, b) => b[1] - a[1]);
+            if (capitalesEntries.length === 0) {
+                console.log(`   Aucune capitale trouvée`);
+            } else {
+                capitalesEntries.forEach(([iso2, count]) => {
+                    const country = countriesData.find(c => c.iso2 === iso2);
+                    console.log(`   ${count}x - ${country ? country.nom : iso2}`);
+                });
+            }
+            
+            console.log(`\n🎓 Mode "Expert":`);
+            const expertEntries = Object.entries(stats['expert']).sort((a, b) => b[1] - a[1]);
+            if (expertEntries.length === 0) {
+                console.log(`   Aucun pays trouvé`);
+            } else {
+                expertEntries.forEach(([iso2, count]) => {
+                    const country = countriesData.find(c => c.iso2 === iso2);
+                    console.log(`   ${count}x - ${country ? country.nom : iso2}`);
+                });
+            }
+            
+            // Calculer pays uniques
+            const allCountries = new Set();
+            Object.values(stats).forEach(modeStats => {
+                Object.keys(modeStats).forEach(iso2 => {
+                    if (modeStats[iso2] > 0) {
+                        allCountries.add(iso2);
+                    }
+                });
+            });
+            
+            console.log(`\n📚 Total pays découverts: ${allCountries.size}/195`);
+            console.log(`═══════════════════════════════════\n`);
+        };
 
         // =====================================
         // SYSTÈME D'ONGLETS
@@ -1815,15 +1912,78 @@
                 return;
             }
             
-            // Cette fonction sera implémentée avec les données des pays
-            // Pour l'instant, on affiche juste un message
+            // Compter les pays uniques découverts (tous modes confondus)
+            function countDiscoveredCountries() {
+                if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
+                    return 0;
+                }
+                
+                const allCountries = new Set();
+                const stats = playerData[currentPlayer].stats;
+                
+                // Collecter tous les pays de tous les modes
+                Object.values(stats).forEach(modeStats => {
+                    Object.keys(modeStats).forEach(iso2 => {
+                        if (modeStats[iso2] > 0) {
+                            allCountries.add(iso2);
+                        }
+                    });
+                });
+                
+                return allCountries.size;
+            }
+            
             const grid = document.getElementById('collectionGrid');
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #666;">
-                    <p style="font-size: 1.2em;">La collection sera affichée ici avec les données des pays.</p>
-                    <p style="margin-top: 10px;">📚 Tu as découvert <strong>${playerData[currentPlayer].collection.length}</strong> pays !</p>
-                </div>
-            `;
+            const stats = playerData[currentPlayer].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
+            const nommePaysStats = stats['nomme-pays'] || {};
+            
+            // Trier les pays par continent puis par nom
+            const sortedCountries = [...countriesData].sort((a, b) => {
+                if (a.continent !== b.continent) {
+                    return a.continent.localeCompare(b.continent, 'fr');
+                }
+                return a.nom.localeCompare(b.nom, 'fr');
+            });
+            
+            let html = '';
+            let currentContinent = '';
+            
+            sortedCountries.forEach(country => {
+                // Ajouter un titre de continent si on change de continent
+                if (country.continent !== currentContinent) {
+                    if (currentContinent !== '') {
+                        html += '</div>'; // Fermer la div du continent précédent
+                    }
+                    currentContinent = country.continent;
+                    html += `
+                        <div style="grid-column: 1/-1; margin-top: 20px; margin-bottom: 10px;">
+                            <h3 style="color: #00838F; font-size: 1.3em; border-bottom: 2px solid #00ACC1; padding-bottom: 5px;">
+                                ${currentContinent}
+                            </h3>
+                        </div>
+                    `;
+                }
+                
+                // Vérifier si le pays a été découvert en mode "Nomme les pays"
+                const isDiscovered = nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0;
+                const grayscale = isDiscovered ? '' : 'filter: grayscale(100%); opacity: 0.4;';
+                
+                html += `
+                    <div class="country-card" title="${country.nom}">
+                        <img 
+                            src="./flags/${country.iso2.toLowerCase()}.png" 
+                            alt="${country.nom}"
+                            style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; ${grayscale}"
+                            onerror="this.style.display='none'"
+                        >
+                        <div style="font-size: 0.85em; text-align: center; margin-top: 5px; color: ${isDiscovered ? '#333' : '#999'};">
+                            ${country.nom}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
         }
 
         // =====================================
@@ -1835,7 +1995,7 @@
                 return;
             }
             
-            const count = playerData[currentPlayer].collection.length;
+            const count = countDiscoveredCountries();
             const badges = document.querySelectorAll('.badge-card');
             
             const badgeThresholds = {
@@ -1894,15 +2054,6 @@
                         currentMap.colorCountry(country.nom);
                     }
                     
-                    // Ajouter à la collection du joueur
-                    if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                        playerData[currentPlayer].collection.push(country.iso2);
-                    }
-                }
-            });
-            
-            // Sauvegarder
-            savePlayerData();
             
             // Mettre à jour l'affichage
             updateFoundList();
@@ -1937,15 +2088,6 @@
                         currentMap.colorCountry(country.nom);
                     }
                     
-                    // Ajouter à la collection du joueur
-                    if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                        playerData[currentPlayer].collection.push(country.iso2);
-                    }
-                }
-            });
-            
-            // Sauvegarder
-            savePlayerData();
             
             // Mettre à jour l'affichage
             updateFoundList();
@@ -1980,15 +2122,6 @@
                         currentMap.colorCountry(country.nom);
                     }
                     
-                    // Ajouter à la collection du joueur
-                    if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                        playerData[currentPlayer].collection.push(country.iso2);
-                    }
-                }
-            });
-            
-            // Sauvegarder
-            savePlayerData();
             
             // Mettre à jour l'affichage
             updateFoundList();
@@ -2256,10 +2389,6 @@
                     currentMap.colorCountry(country.nom);
                 }
 
-                // Ajouter à la collection du joueur
-                if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                    playerData[currentPlayer].collection.push(country.iso2);
-                    savePlayerData();
                 }
 
                 // Feedback positif
@@ -2340,10 +2469,6 @@
                     currentMap.colorCountry(country.nom);
                 }
 
-                // Ajouter à la collection du joueur
-                if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                    playerData[currentPlayer].collection.push(country.iso2);
-                    savePlayerData();
                 }
 
                 // Feedback positif
@@ -2434,10 +2559,6 @@
                     currentMap.colorCountry(country.nom);
                 }
 
-                // Ajouter à la collection du joueur
-                if (!playerData[currentPlayer].collection.includes(country.iso2)) {
-                    playerData[currentPlayer].collection.push(country.iso2);
-                    savePlayerData();
                 }
 
                 // Feedback positif
@@ -2829,12 +2950,24 @@
         }
 
         function saveCurrentProgress() {
-            // Sauvegarder tous les pays trouvés dans cette partie
+            // Initialiser la structure si elle n'existe pas (rétrocompatibilité)
+            if (!playerData[currentPlayer].stats) {
+                playerData[currentPlayer].stats = {
+                    'nomme-pays': {},
+                    'capitales': {},
+                    'expert': {}
+                };
+            }
+            
+            // Incrémenter le compteur pour chaque pays trouvé dans le mode actuel
+            const modeStats = playerData[currentPlayer].stats[selectedMode];
             foundCountries.forEach(iso2 => {
-                if (!playerData[currentPlayer].collection.includes(iso2)) {
-                    playerData[currentPlayer].collection.push(iso2);
+                if (!modeStats[iso2]) {
+                    modeStats[iso2] = 0;
                 }
+                modeStats[iso2]++;
             });
+            
             savePlayerData();
         }
 
