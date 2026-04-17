@@ -1498,6 +1498,300 @@
         }
 
         /* ========================================
+           MODE LIMITE POPULATION
+        ======================================== */
+
+        .population-counter {
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .population-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .current-population,
+        .target-population {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .current-population .label,
+        .target-population .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .current-population .value,
+        .target-population .value {
+            font-size: 3em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .current-population .unit,
+        .target-population .unit {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .population-separator {
+            font-size: 3em;
+            font-weight: 100;
+            opacity: 0.5;
+        }
+
+        .population-bar {
+            background: rgba(255,255,255,0.3);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .population-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #48BB78, #38A169);
+            border-radius: 15px;
+            transition: width 0.5s ease, background 0.3s ease;
+        }
+
+        .population-progress.warning {
+            background: linear-gradient(90deg, #F59E0B, #D97706);
+        }
+
+        .population-progress.danger {
+            background: linear-gradient(90deg, #EF4444, #DC2626);
+        }
+
+        .population-remaining {
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .population-categories {
+            background: #f7f7f7;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .population-categories h3 {
+            color: #00838F;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .category-card {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-color: #00ACC1;
+        }
+
+        .category-card.expanded {
+            background: #E0F7FA;
+            border-color: #00ACC1;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .category-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #00838F;
+        }
+
+        .category-count {
+            background: #00ACC1;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .category-range {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .category-countries {
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #00ACC1;
+        }
+
+        .category-card.expanded .category-countries {
+            display: block;
+        }
+
+        .country-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .country-item:hover {
+            background: #F0F9FF;
+            border-color: #00ACC1;
+        }
+
+        .country-item.selected {
+            background: #DCFCE7;
+            border-color: #48BB78;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .country-name {
+            font-weight: 600;
+            color: #00838F;
+        }
+
+        .country-population {
+            font-size: 0.9em;
+            color: #666;
+            background: #F3F4F6;
+            padding: 3px 8px;
+            border-radius: 8px;
+        }
+
+        .selected-countries {
+            background: #f7f7f7;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .selected-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .selected-header h3 {
+            color: #00838F;
+            font-size: 1.4em;
+        }
+
+        .btn-stop-game {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-stop-game:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .selected-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .selected-list .empty-message {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        .selected-country-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #48BB78;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selected-country-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .selected-country-flag {
+            font-size: 2em;
+        }
+
+        .selected-country-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .selected-country-name {
+            font-weight: bold;
+            color: #00838F;
+            font-size: 1.1em;
+        }
+
+        .selected-country-pop {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .selected-country-pop strong {
+            color: #48BB78;
+        }
+
+        /* ========================================
            RESPONSIVE
         ======================================== */
 
@@ -2000,6 +2294,68 @@
             <div class="found-countries">
                 <h3>Pays trouvés</h3>
                 <div class="found-list" id="foundList"></div>
+            </div>
+        </div>
+
+        <!-- ========================================
+             ÉCRAN DE JEU - LIMITE POPULATION
+        ======================================== -->
+        <div class="game-screen hidden" id="populationGameScreen">
+            <!-- En-tête du jeu -->
+            <div class="game-header">
+                <div class="game-info">
+                    <h2 id="populationGameTitle">👥 Ne dépasse pas la limite !</h2>
+                    <div class="game-stats">
+                        <span class="stat-item">
+                            Difficulté : <strong id="currentDifficulty">Facile</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="game-buttons">
+                    <button class="btn-quit" id="quitPopulationGameBtn">❌ Quitter</button>
+                </div>
+            </div>
+
+            <!-- Compteur de population -->
+            <div class="population-counter">
+                <div class="population-display">
+                    <div class="current-population">
+                        <span class="label">Population actuelle</span>
+                        <span class="value" id="currentPopulation">0</span>
+                        <span class="unit">millions</span>
+                    </div>
+                    <div class="population-separator">/</div>
+                    <div class="target-population">
+                        <span class="label">Objectif</span>
+                        <span class="value" id="targetPopulation">0</span>
+                        <span class="unit">millions</span>
+                    </div>
+                </div>
+                <div class="population-bar">
+                    <div class="population-progress" id="populationProgress"></div>
+                </div>
+                <div class="population-remaining">
+                    Reste : <strong id="remainingPopulation">0</strong> millions
+                </div>
+            </div>
+
+            <!-- Catégories de pays par population -->
+            <div class="population-categories">
+                <h3>📊 Sélectionne un pays par catégorie</h3>
+                <div class="categories-grid" id="categoriesGrid">
+                    <!-- Les catégories seront générées dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Pays sélectionnés -->
+            <div class="selected-countries">
+                <div class="selected-header">
+                    <h3>Pays sélectionnés (<span id="selectedCount">0</span>)</h3>
+                    <button class="btn-stop-game" id="stopGameBtn">🛑 Je m'arrête là !</button>
+                </div>
+                <div class="selected-list" id="selectedList">
+                    <p class="empty-message">Aucun pays sélectionné pour le moment</p>
+                </div>
             </div>
         </div>
     </div>
@@ -2624,8 +2980,7 @@
                 }
                 
                 console.log('🚀 Lancer le jeu en mode:', selectedMode, 'difficulté:', selectedDifficulty);
-                // La logique du jeu sera ajoutée ici
-                alert(`Mode: ${selectedMode}\nDifficulté: ${selectedDifficulty}\n\nLe jeu sera implémenté prochainement !`);
+                startPopulationGame();
             });
         }
 
@@ -4535,6 +4890,252 @@
                 createPlayer();
             }
         });
+
+        // =====================================
+        // JEU LIMITE POPULATION
+        // =====================================
+
+        let populationGameState = {
+            targetPopulation: 0,
+            currentPopulation: 0,
+            selectedCountries: [],
+            availableCountries: [],
+            categories: []
+        };
+
+        function startPopulationGame() {
+            console.log('🎮 Démarrage du jeu limite-population');
+            
+            // Masquer l'écran de configuration
+            document.getElementById('difficultySelectionScreen').classList.add('hidden');
+            
+            // Afficher l'écran de jeu population
+            const gameScreen = document.getElementById('populationGameScreen');
+            gameScreen.classList.remove('hidden');
+            
+            // Initialiser le jeu
+            initPopulationGame();
+        }
+
+        function initPopulationGame() {
+            // Réinitialiser l'état du jeu
+            populationGameState.selectedCountries = [];
+            populationGameState.currentPopulation = 0;
+            
+            // Définir l'objectif aléatoire : entre 5 millions et la somme totale de tous les pays
+            const totalWorldPopulation = countriesData.reduce((sum, c) => sum + c.habitants, 0);
+            const minPopulation = 5000000; // 5 millions
+            populationGameState.targetPopulation = Math.floor(
+                Math.random() * (totalWorldPopulation - minPopulation) + minPopulation
+            );
+            
+            console.log(`🎯 Objectif: ${(populationGameState.targetPopulation / 1000000).toFixed(1)}M sur ${(totalWorldPopulation / 1000000).toFixed(1)}M total`);
+            
+            // Copier tous les pays disponibles
+            populationGameState.availableCountries = [...countriesData];
+            
+            // Créer les catégories
+            createPopulationCategories();
+            
+            // Afficher l'interface
+            updatePopulationDisplay();
+            
+            // Afficher la difficulté
+            document.getElementById('currentDifficulty').textContent = 
+                selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
+            
+            // Gérer le bouton quitter
+            document.getElementById('quitPopulationGameBtn').onclick = () => {
+                if (confirm('⚠️ Veux-tu vraiment quitter la partie ?')) {
+                    quitPopulationGame();
+                }
+            };
+            
+            // Gérer le bouton "Je m'arrête là"
+            document.getElementById('stopGameBtn').onclick = () => {
+                endPopulationGame(false);
+            };
+        }
+
+        function createPopulationCategories() {
+            const categories = [
+                { name: '< 1M', min: 0, max: 1000000, icon: '🏘️' },
+                { name: '1M - 10M', min: 1000000, max: 10000000, icon: '🏙️' },
+                { name: '10M - 50M', min: 10000000, max: 50000000, icon: '🌆' },
+                { name: '50M - 100M', min: 50000000, max: 100000000, icon: '🏢' },
+                { name: '100M - 200M', min: 100000000, max: 200000000, icon: '🌃' },
+                { name: '200M - 500M', min: 200000000, max: 500000000, icon: '🌉' },
+                { name: '500M - 1Md', min: 500000000, max: 1000000000, icon: '🏛️' },
+                { name: '> 1Md', min: 1000000000, max: Infinity, icon: '🌏' }
+            ];
+            
+            populationGameState.categories = categories.map(cat => {
+                const countries = populationGameState.availableCountries.filter(
+                    c => c.habitants >= cat.min && c.habitants < cat.max
+                );
+                return { ...cat, countries };
+            }).filter(cat => cat.countries.length > 0);
+            
+            renderCategories();
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = '';
+            
+            populationGameState.categories.forEach((category, index) => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.innerHTML = `
+                    <div class="category-header">
+                        <div class="category-title">${category.icon} ${category.name}</div>
+                        <div class="category-count">${category.countries.length}</div>
+                    </div>
+                    <div class="category-range">Population dans cette tranche</div>
+                    <div class="category-countries" id="category-${index}">
+                        ${category.countries.map(country => `
+                            <div class="country-item" data-iso2="${country.iso2}">
+                                <span class="country-name">${country.nom}</span>
+                                <span class="country-population">${formatPopulation(country.habitants)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                // Toggle expansion de la catégorie
+                const header = card.querySelector('.category-header');
+                header.addEventListener('click', () => {
+                    card.classList.toggle('expanded');
+                });
+                
+                // Gérer les clics sur les pays
+                const countryItems = card.querySelectorAll('.country-item');
+                countryItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const iso2 = item.dataset.iso2;
+                        selectCountry(iso2);
+                    });
+                });
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function selectCountry(iso2) {
+            // Vérifier si déjà sélectionné
+            if (populationGameState.selectedCountries.find(c => c.iso2 === iso2)) {
+                return;
+            }
+            
+            const country = populationGameState.availableCountries.find(c => c.iso2 === iso2);
+            if (!country) return;
+            
+            const newPopulation = populationGameState.currentPopulation + country.habitants;
+            
+            // Vérifier si on dépasse
+            if (newPopulation > populationGameState.targetPopulation) {
+                endPopulationGame(true);
+                return;
+            }
+            
+            // Ajouter le pays
+            populationGameState.selectedCountries.push(country);
+            populationGameState.currentPopulation = newPopulation;
+            
+            // Marquer le pays comme sélectionné dans l'interface
+            const countryItem = document.querySelector(`.country-item[data-iso2="${iso2}"]`);
+            if (countryItem) {
+                countryItem.classList.add('selected');
+            }
+            
+            // Mettre à jour l'affichage
+            updatePopulationDisplay();
+            renderSelectedCountries();
+        }
+
+        function formatPopulation(pop) {
+            if (pop >= 1000000) {
+                return (pop / 1000000).toFixed(1) + 'M';
+            }
+            return pop.toLocaleString('fr-FR');
+        }
+
+        function updatePopulationDisplay() {
+            const currentMil = (populationGameState.currentPopulation / 1000000).toFixed(1);
+            const targetMil = (populationGameState.targetPopulation / 1000000).toFixed(1);
+            const remainingMil = ((populationGameState.targetPopulation - populationGameState.currentPopulation) / 1000000).toFixed(1);
+            
+            document.getElementById('currentPopulation').textContent = currentMil;
+            document.getElementById('targetPopulation').textContent = targetMil;
+            document.getElementById('remainingPopulation').textContent = remainingMil;
+            
+            // Mettre à jour la barre de progression
+            const percentage = (populationGameState.currentPopulation / populationGameState.targetPopulation) * 100;
+            const progressBar = document.getElementById('populationProgress');
+            progressBar.style.width = percentage + '%';
+            
+            // Changer la couleur selon le niveau
+            progressBar.classList.remove('warning', 'danger');
+            if (percentage >= 90) {
+                progressBar.classList.add('danger');
+            } else if (percentage >= 75) {
+                progressBar.classList.add('warning');
+            }
+        }
+
+        function renderSelectedCountries() {
+            const list = document.getElementById('selectedList');
+            const count = document.getElementById('selectedCount');
+            
+            count.textContent = populationGameState.selectedCountries.length;
+            
+            if (populationGameState.selectedCountries.length === 0) {
+                list.innerHTML = '<p class="empty-message">Aucun pays sélectionné pour le moment</p>';
+                return;
+            }
+            
+            list.innerHTML = populationGameState.selectedCountries.map(country => `
+                <div class="selected-country-card">
+                    <div class="selected-country-info">
+                        <div class="selected-country-flag">🏴</div>
+                        <div class="selected-country-details">
+                            <div class="selected-country-name">${country.nom}</div>
+                            <div class="selected-country-pop">
+                                Population: <strong>${formatPopulation(country.habitants)}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function endPopulationGame(exceeded) {
+            if (exceeded) {
+                alert(`💥 DÉPASSEMENT !\n\nTu as dépassé la limite de ${(populationGameState.targetPopulation / 1000000).toFixed(1)} millions d'habitants.\n\nPays trouvés: ${populationGameState.selectedCountries.length - 1}`);
+            } else {
+                alert(`🎉 BRAVO !\n\nTu t'es arrêté à temps !\n\nPopulation finale: ${(populationGameState.currentPopulation / 1000000).toFixed(1)} millions\nObjectif: ${(populationGameState.targetPopulation / 1000000).toFixed(1)} millions\n\nPays trouvés: ${populationGameState.selectedCountries.length}`);
+            }
+            
+            quitPopulationGame();
+        }
+
+        function quitPopulationGame() {
+            // Masquer l'écran de jeu
+            document.getElementById('populationGameScreen').classList.add('hidden');
+            
+            // Afficher l'écran de configuration
+            document.getElementById('difficultySelectionScreen').classList.remove('hidden');
+            
+            // Réinitialiser l'état
+            populationGameState = {
+                targetPopulation: 0,
+                currentPopulation: 0,
+                selectedCountries: [],
+                availableCountries: [],
+                categories: []
+            };
+        }
 
         // Initialiser au chargement
         window.addEventListener('DOMContentLoaded', () => {
