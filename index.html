@@ -1594,9 +1594,12 @@
         // Charger les données des joueurs depuis localStorage avec gestion d'erreur
         try {
             const stored = localStorage.getItem('geoQuizPlayers');
+            console.log('🔍 localStorage brut:', stored);
             playerData = stored ? JSON.parse(stored) : {};
+            console.log('✅ playerData chargé:', playerData);
+            console.log('📊 Nombre de joueurs:', Object.keys(playerData).length);
         } catch (error) {
-            console.error('Erreur chargement localStorage:', error);
+            console.error('❌ Erreur chargement localStorage:', error);
             playerData = {};
         }
         
@@ -1815,22 +1818,41 @@
 
         // 🔍 Fonction de debug pour inspecter le localStorage
         window.debugStorage = function() {
-            console.log('=== DEBUG LOCALSTORAGE ===');
+            console.log('\n🔍 === DEBUG LOCALSTORAGE ===');
             const stored = localStorage.getItem('geoQuizPlayers');
-            console.log('Raw data:', stored);
+            console.log('📦 Raw data:', stored);
+            
             if (stored) {
-                const parsed = JSON.parse(stored);
-                console.log('Parsed data:', parsed);
-                console.log('Nombre de joueurs:', Object.keys(parsed).length);
-                Object.keys(parsed).forEach(playerName => {
-                    console.log(`\n👤 ${playerName}:`);
-                    console.log('  Stats:', parsed[playerName].stats);
-                    console.log('  Badges:', parsed[playerName].badges);
-                });
+                try {
+                    const parsed = JSON.parse(stored);
+                    console.log('✅ Parsed data:', parsed);
+                    console.log('👥 Nombre de joueurs:', Object.keys(parsed).length);
+                    
+                    Object.keys(parsed).forEach(playerName => {
+                        console.log(`\n👤 ${playerName}:`);
+                        console.log('  📊 Stats:', parsed[playerName].stats);
+                        console.log('  🏆 Badges:', parsed[playerName].badges);
+                        console.log('  📅 Créé le:', parsed[playerName].createdAt);
+                        
+                        // Compter pays découverts
+                        const stats = parsed[playerName].stats || {};
+                        const allCountries = new Set();
+                        Object.values(stats).forEach(modeStats => {
+                            Object.keys(modeStats || {}).forEach(iso2 => {
+                                if (modeStats[iso2] > 0) allCountries.add(iso2);
+                            });
+                        });
+                        console.log('  🌍 Pays découverts:', allCountries.size);
+                    });
+                } catch (error) {
+                    console.error('❌ Erreur parsing:', error);
+                }
             } else {
-                console.log('❌ Aucune donnée trouvée');
+                console.log('❌ Aucune donnée trouvée dans localStorage');
             }
-            console.log('========================');
+            
+            console.log('\n💾 État actuel de playerData:', playerData);
+            console.log('========================\n');
         };
 
         // 📊 Fonction utile pour voir les stats détaillées dans la console
