@@ -2640,13 +2640,13 @@
         // =====================================
 
         const explorationBadges = [
-            { id: 'monde', name: 'Expert Monde', emoji: '🌍', zone: 'monde', total: 195 },
-            { id: 'europe', name: 'Expert Europe', emoji: '🗼', zone: 'europe', total: 49 },
-            { id: 'asie', name: 'Expert Asie', emoji: '🏯', zone: 'asie', total: 43 },
-            { id: 'afrique', name: 'Expert Afrique', emoji: '🦁', zone: 'afrique', total: 54 },
-            { id: 'amerique-nord', name: 'Expert Amérique du Nord', emoji: '🗽', zone: 'amerique-nord', total: 23 },
-            { id: 'amerique-sud', name: 'Expert Amérique du Sud', emoji: '🗿', zone: 'amerique-sud', total: 12 },
-            { id: 'oceanie', name: 'Expert Océanie', emoji: '🦘', zone: 'oceanie', total: 14 }
+            { id: 'monde', name: 'Monde', emoji: '🌍', zone: 'monde', total: 195 },
+            { id: 'europe', name: 'Europe', emoji: '🗼', zone: 'europe', total: 49 },
+            { id: 'asie', name: 'Asie', emoji: '🏯', zone: 'asie', total: 43 },
+            { id: 'afrique', name: 'Afrique', emoji: '🦁', zone: 'afrique', total: 54 },
+            { id: 'amerique-nord', name: 'Amérique du Nord', emoji: '🗽', zone: 'amerique-nord', total: 23 },
+            { id: 'amerique-sud', name: 'Amérique du Sud', emoji: '🗿', zone: 'amerique-sud', total: 12 },
+            { id: 'oceanie', name: 'Océanie', emoji: '🦘', zone: 'oceanie', total: 14 }
         ];
 
         const capitalesBadges = [
@@ -3465,6 +3465,9 @@
                     countryInput.value = '';
                     capitalInput.value = '';
                     
+                    // Remettre le focus sur le champ Pays
+                    countryInput.focus();
+                    
                     setTimeout(() => {
                         feedback.classList.remove('show');
                     }, 2000);
@@ -3491,6 +3494,9 @@
 
                 countryInput.value = '';
                 capitalInput.value = '';
+                
+                // Remettre le focus sur le champ Pays
+                countryInput.focus();
 
                 setTimeout(() => {
                     feedback.classList.remove('show');
