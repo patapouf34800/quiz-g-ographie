@@ -5168,11 +5168,80 @@
             `).join('');
         }
 
+        function calculatePopulationScore(exceeded) {
+            const populationActuelle = populationGameState.currentPopulation;
+            const objectif = populationGameState.targetPopulation;
+            const nombrePays = populationGameState.selectedCountries.length;
+            
+            // Si dépassement, on retire le dernier pays pour le calcul
+            const paysACompter = exceeded ? nombrePays - 1 : nombrePays;
+            const populationPourScore = exceeded ? populationActuelle - populationGameState.selectedCountries[nombrePays - 1].habitants : populationActuelle;
+            
+            // 1. Score de Distance (base 1000 points)
+            const scoreDistance = 1000 * (populationPourScore / objectif);
+            
+            // 2. Multiplicateur de Risque
+            // Ne compter que les pays qui représentent au moins 0.5% de l'objectif
+            const seuilSignificatif = objectif * 0.005;
+            const paysSignificatifs = populationGameState.selectedCountries
+                .slice(0, paysACompter)
+                .filter(country => country.habitants >= seuilSignificatif)
+                .length;
+            
+            const multiplicateurRisque = 1 + Math.min(
+                (paysSignificatifs / 10) * (populationPourScore / 1_000_000_000),
+                1.0
+            );
+            
+            // 3. Pénalité de Dépassement
+            const penalite = exceeded ? 0.5 : 1.0;
+            
+            // Score Final
+            const scoreFinal = Math.round(scoreDistance * multiplicateurRisque * penalite);
+            
+            return {
+                scoreFinal,
+                scoreDistance: Math.round(scoreDistance),
+                multiplicateurRisque: multiplicateurRisque.toFixed(2),
+                paysSignificatifs,
+                penalite
+            };
+        }
+
         function endPopulationGame(exceeded) {
+            const score = calculatePopulationScore(exceeded);
+            const populationMil = (populationGameState.currentPopulation / 1000000).toFixed(1);
+            const objectifMil = (populationGameState.targetPopulation / 1000000).toFixed(1);
+            const nombrePays = exceeded ? populationGameState.selectedCountries.length - 1 : populationGameState.selectedCountries.length;
+            
             if (exceeded) {
-                alert(`💥 DÉPASSEMENT !\n\nTu as dépassé la limite de ${(populationGameState.targetPopulation / 1000000).toFixed(1)} millions d'habitants.\n\nPays trouvés: ${populationGameState.selectedCountries.length - 1}`);
+                alert(`💥 DÉPASSEMENT !
+
+Tu as dépassé la limite de ${objectifMil} millions d'habitants.
+
+📊 RÉSULTAT :
+Population finale : ${populationMil}M
+Pays trouvés : ${nombrePays}
+Pays significatifs : ${score.paysSignificatifs}
+
+🎯 SCORE : ${score.scoreFinal} points
+   ├─ Distance : ${score.scoreDistance} pts
+   ├─ Risque : ×${score.multiplicateurRisque}
+   └─ Pénalité : ×${score.penalite} (dépassement)`);
             } else {
-                alert(`🎉 BRAVO !\n\nTu t'es arrêté à temps !\n\nPopulation finale: ${(populationGameState.currentPopulation / 1000000).toFixed(1)} millions\nObjectif: ${(populationGameState.targetPopulation / 1000000).toFixed(1)} millions\n\nPays trouvés: ${populationGameState.selectedCountries.length}`);
+                alert(`🎉 BRAVO !
+
+Tu t'es arrêté à temps !
+
+📊 RÉSULTAT :
+Population finale : ${populationMil}M / ${objectifMil}M
+Pays trouvés : ${nombrePays}
+Pays significatifs : ${score.paysSignificatifs}
+
+🎯 SCORE : ${score.scoreFinal} points
+   ├─ Distance : ${score.scoreDistance} pts
+   ├─ Risque : ×${score.multiplicateurRisque}
+   └─ Pénalité : ×${score.penalite}`);
             }
             
             quitPopulationGame();
