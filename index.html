@@ -5187,9 +5187,18 @@
             const objectif = populationGameState.targetPopulation;
             const nombrePays = populationGameState.selectedCountries.length;
             
+            console.log('=== CALCUL SCORE ===');
+            console.log('Dépassement:', exceeded);
+            console.log('Nombre de pays total:', nombrePays);
+            console.log('Pays sélectionnés:', populationGameState.selectedCountries.map(c => `${c.nom} (${(c.habitants/1000000).toFixed(1)}M)`));
+            
             // Si dépassement, on retire le dernier pays pour le calcul
             const paysACompter = exceeded ? nombrePays - 1 : nombrePays;
             const populationPourScore = exceeded ? populationActuelle - populationGameState.selectedCountries[nombrePays - 1].habitants : populationActuelle;
+            
+            console.log('Pays à compter:', paysACompter);
+            console.log('Population pour score:', (populationPourScore/1000000).toFixed(1), 'M');
+            console.log('Objectif:', (objectif/1000000).toFixed(1), 'M');
             
             // 1. Score de Distance (base 1000 points)
             const scoreDistance = 1000 * (populationPourScore / objectif);
@@ -5197,21 +5206,36 @@
             // 2. Multiplicateur de Risque
             // Ne compter que les pays qui représentent au moins 0.5% de l'objectif
             const seuilSignificatif = objectif * 0.005;
-            const paysSignificatifs = populationGameState.selectedCountries
-                .slice(0, paysACompter)
-                .filter(country => country.habitants >= seuilSignificatif)
+            console.log('Seuil significatif:', (seuilSignificatif/1000000).toFixed(2), 'M');
+            
+            const paysAEvaluer = populationGameState.selectedCountries.slice(0, paysACompter);
+            console.log('Pays à évaluer:', paysAEvaluer.map(c => `${c.nom} (${(c.habitants/1000000).toFixed(1)}M)`));
+            
+            const paysSignificatifs = paysAEvaluer
+                .filter(country => {
+                    const estSignificatif = country.habitants >= seuilSignificatif;
+                    console.log(`  ${country.nom}: ${(country.habitants/1000000).toFixed(1)}M >= ${(seuilSignificatif/1000000).toFixed(2)}M ? ${estSignificatif}`);
+                    return estSignificatif;
+                })
                 .length;
+            
+            console.log('Pays significatifs comptés:', paysSignificatifs);
             
             const multiplicateurRisque = 1 + Math.min(
                 (paysSignificatifs / 10) * (populationPourScore / 1_000_000_000),
                 1.0
             );
             
+            console.log('Multiplicateur risque:', multiplicateurRisque.toFixed(3));
+            
             // 3. Pénalité de Dépassement
             const penalite = exceeded ? 0.5 : 1.0;
             
             // Score Final
             const scoreFinal = Math.round(scoreDistance * multiplicateurRisque * penalite);
+            
+            console.log('Score final:', scoreFinal);
+            console.log('===================');
             
             return {
                 scoreFinal,
