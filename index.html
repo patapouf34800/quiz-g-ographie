@@ -2296,7 +2296,7 @@
             });
             
             // Mettre à jour les compteurs des onglets
-            updateContinentTabs(nommePaysStats);
+            updateContinentTabs(nommePaysStats, expertStats);
             
             let html = '';
             let currentContinent = '';
@@ -2374,7 +2374,7 @@
             document.getElementById('collectionPercentage').textContent = Math.round((discoveredCount / 195) * 100) + '%';
         }
 
-        function updateContinentTabs(nommePaysStats) {
+        function updateContinentTabs(nommePaysStats, expertStats) {
             // Compter les pays découverts par continent
             const continentCounts = {
                 'tous': { found: 0, total: 195 },
@@ -2391,7 +2391,11 @@
                     continentCounts[continentKey].total++;
                 }
                 
-                if (nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0) {
+                // Un pays est découvert si : (Nomme ≥ 1) OU (Expert ≥ 1)
+                const nommePaysCount = nommePaysStats[country.iso2] || 0;
+                const expertCount = expertStats[country.iso2] || 0;
+                
+                if (nommePaysCount > 0 || expertCount > 0) {
                     continentCounts['tous'].found++;
                     if (continentCounts[continentKey]) {
                         continentCounts[continentKey].found++;
