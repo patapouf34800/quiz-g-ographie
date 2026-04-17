@@ -1287,6 +1287,109 @@
             box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
         }
 
+        /* ========================================
+           MODE DRAPEAUX
+        ======================================== */
+
+        .flags-zone {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .flags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .flag-item {
+            background: #f9f9f9;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .flag-item.found {
+            border-color: #48BB78;
+            background: #F0FFF4;
+        }
+
+        .flag-item.revealed {
+            border-color: #F59E0B;
+            background: #FFF9E6;
+        }
+
+        .flag-display {
+            width: 120px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .flag-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .flag-item input {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Segoe UI', Arial;
+        }
+
+        .flag-item input:focus {
+            outline: none;
+            border-color: #00ACC1;
+            box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+        }
+
+        .flag-item.found input {
+            border-color: #48BB78;
+            background: white;
+            color: #2F855A;
+            font-weight: bold;
+        }
+
+        .flag-item.revealed input {
+            border-color: #F59E0B;
+            background: white;
+            color: #D97706;
+        }
+
+        .flag-answer {
+            margin-top: 10px;
+            font-size: 0.95em;
+            font-weight: bold;
+            color: #2F855A;
+            display: none;
+        }
+
+        .flag-item.found .flag-answer,
+        .flag-item.revealed .flag-answer {
+            display: block;
+        }
+
+        .flag-item.revealed .flag-answer {
+            color: #D97706;
+        }
+
         .found-countries {
             background: #f7f7f7;
             padding: 20px;
@@ -1489,10 +1592,10 @@
                                 <div class="mode-name">Expert</div>
                                 <div class="mode-description">Pays ET capitales</div>
                             </div>
-                            <div class="mode-card disabled" data-mode="drapeaux">
+                            <div class="mode-card" data-mode="drapeaux">
                                 <div class="mode-icon">🏴</div>
                                 <div class="mode-name">Drapeaux</div>
-                                <div class="mode-description">Bientôt disponible</div>
+                                <div class="mode-description">Reconnais 10 drapeaux</div>
                             </div>
                         </div>
                         <button class="btn-continue" id="continueToZoneBtn">Continuer →</button>
@@ -1820,6 +1923,13 @@
                 <div class="input-feedback" id="expertFeedback"></div>
             </div>
 
+            <!-- Zone de jeu Drapeaux (10 drapeaux en grille) -->
+            <div class="flags-zone hidden" id="flagsZone">
+                <div class="flags-grid" id="flagsGrid">
+                    <!-- Les drapeaux seront générés dynamiquement -->
+                </div>
+            </div>
+
             <!-- Liste des pays trouvés -->
             <div class="found-countries">
                 <h3>Pays trouvés</h3>
@@ -1957,8 +2067,13 @@
                         data.stats = {
                             'nomme-pays': {},
                             'capitales': {},
-                            'expert': {}
+                            'expert': {},
+                            'drapeaux': {}
                         };
+                    }
+                    // Ajouter drapeaux si manquant (rétrocompatibilité)
+                    if (!data.stats['drapeaux']) {
+                        data.stats['drapeaux'] = {};
                     }
                     if (!data.badges) {
                         data.badges = [];
@@ -2061,7 +2176,8 @@
                 playerData[currentPlayer].stats = {
                     'nomme-pays': {},
                     'capitales': {},
-                    'expert': {}
+                    'expert': {},
+                    'drapeaux': {}
                 };
             }
             
@@ -3164,13 +3280,15 @@
             const modeIcons = {
                 'nomme-pays': '🗺️',
                 'capitales': '🏛️',
-                'expert': '🎓'
+                'expert': '🎓',
+                'drapeaux': '🏴'
             };
             
             const modeTitles = {
                 'nomme-pays': 'Nomme les pays',
                 'capitales': 'Capitales',
-                'expert': 'Expert'
+                'expert': 'Expert',
+                'drapeaux': 'Drapeaux'
             };
             
             const placeholders = {
@@ -3182,33 +3300,50 @@
             document.getElementById('gameTitle').textContent = `${modeIcons[selectedMode]} ${modeTitles[selectedMode]} - ${zoneNames[selectedZone]}`;
             
             // Gérer l'affichage des inputs selon le mode
-            if (selectedMode === 'expert') {
+            if (selectedMode === 'drapeaux') {
+                // Mode Drapeaux : afficher la grille, cacher les inputs et la carte
+                document.getElementById('singleInputZone').classList.add('hidden');
+                document.getElementById('expertInputZone').classList.add('hidden');
+                document.getElementById('flagsZone').classList.remove('hidden');
+                document.getElementById('mapContainer').style.display = 'none';
+                
+                // Initialiser le mode drapeaux
+                initFlagsMode();
+            } else if (selectedMode === 'expert') {
                 document.getElementById('singleInputZone').classList.add('hidden');
                 document.getElementById('expertInputZone').classList.remove('hidden');
+                document.getElementById('flagsZone').classList.add('hidden');
+                document.getElementById('mapContainer').style.display = 'block';
                 document.getElementById('expertCountryInput').value = '';
                 document.getElementById('expertCapitalInput').value = '';
                 document.getElementById('expertFeedback').classList.remove('show');
             } else {
                 document.getElementById('expertInputZone').classList.add('hidden');
                 document.getElementById('singleInputZone').classList.remove('hidden');
+                document.getElementById('flagsZone').classList.add('hidden');
+                document.getElementById('mapContainer').style.display = 'block';
                 document.getElementById('countryInput').placeholder = placeholders[selectedMode];
                 document.getElementById('countryInput').value = '';
                 document.getElementById('inputFeedback').classList.remove('show');
             }
             
             document.getElementById('foundCount').textContent = '0';
-            document.getElementById('totalCount').textContent = currentGameCountries.length;
+            document.getElementById('totalCount').textContent = selectedMode === 'drapeaux' ? '10' : currentGameCountries.length;
             document.getElementById('gamePercentage').textContent = '0%';
             
-            // Afficher la liste complète dès le début (avec cases vides)
-            updateFoundList();
+            // Afficher la liste complète dès le début (avec cases vides) - sauf pour drapeaux
+            if (selectedMode !== 'drapeaux') {
+                updateFoundList();
+            }
 
             // Masquer l'écran de config, afficher l'écran de jeu
             document.getElementById('configScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.add('active');
 
-            // Charger la carte SVG
-            await loadGameMap();
+            // Charger la carte SVG (sauf pour drapeaux)
+            if (selectedMode !== 'drapeaux') {
+                await loadGameMap();
+            }
 
             // Focus sur l'input approprié
             if (selectedMode === 'expert') {
@@ -3844,6 +3979,9 @@
                 document.getElementById('expertCountryInput').disabled = true;
                 document.getElementById('expertCapitalInput').disabled = true;
                 document.getElementById('expertValidateBtn').disabled = true;
+            } else if (selectedMode === 'drapeaux') {
+                // Désactiver tous les inputs de drapeaux
+                document.querySelectorAll('.flag-item input').forEach(input => input.disabled = true);
             } else {
                 document.getElementById('countryInput').disabled = true;
             }
@@ -3852,11 +3990,18 @@
             saveCurrentProgress();
             
             // Message de victoire
-            const feedback = selectedMode === 'expert' 
-                ? document.getElementById('expertFeedback')
-                : document.getElementById('inputFeedback');
-            feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
-            feedback.className = 'input-feedback show correct';
+            let feedback;
+            if (selectedMode === 'expert') {
+                feedback = document.getElementById('expertFeedback');
+                feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
+                feedback.className = 'input-feedback show correct';
+            } else if (selectedMode === 'drapeaux') {
+                // Pas de feedback pour le mode drapeaux
+            } else {
+                feedback = document.getElementById('inputFeedback');
+                feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
+                feedback.className = 'input-feedback show correct';
+            }
             
             // Masquer les boutons Abandonner et Quitter
             document.getElementById('abandonGameBtn').style.display = 'none';
@@ -3869,6 +4014,68 @@
             returnBtn.textContent = '← Retour au menu';
             returnBtn.onclick = returnToMenu;
             gameButtons.appendChild(returnBtn);
+        }
+
+        // =====================================
+        // MODE DRAPEAUX
+        // =====================================
+
+        function initFlagsMode() {
+            // Prendre 10 pays aléatoires de la zone
+            const shuffled = [...currentGameCountries].sort(() => Math.random() - 0.5);
+            const selectedFlags = shuffled.slice(0, 10);
+            
+            // Sauvegarder pour la validation
+            currentGameCountries = selectedFlags;
+            
+            // Générer la grille HTML
+            const flagsGrid = document.getElementById('flagsGrid');
+            let html = '';
+            
+            selectedFlags.forEach((country, index) => {
+                html += `
+                    <div class="flag-item" data-iso2="${country.iso2}" data-index="${index}">
+                        <div class="flag-display">
+                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                 alt="Drapeau" 
+                                 onerror="this.style.display='none'">
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Quel pays ?"
+                            autocomplete="off"
+                            data-country="${country.nom}"
+                            data-iso2="${country.iso2}"
+                            oninput="checkFlagAnswer(this)"
+                        >
+                        <div class="flag-answer">✓ ${country.nom}</div>
+                    </div>
+                `;
+            });
+            
+            flagsGrid.innerHTML = html;
+        }
+
+        function checkFlagAnswer(input) {
+            const correctName = input.dataset.country;
+            const iso2 = input.dataset.iso2;
+            const guess = normalizeString(input.value.trim());
+            const normalized = normalizeString(correctName);
+            
+            if (guess === normalized) {
+                // CORRECT !
+                const flagItem = input.closest('.flag-item');
+                flagItem.classList.add('found');
+                input.disabled = true;
+                
+                // Ajouter à foundCountries si pas déjà présent
+                if (!foundCountries.includes(iso2)) {
+                    foundCountries.push(iso2);
+                    
+                    // Mettre à jour les stats
+                    updateGameStats();
+                }
+            }
         }
 
         function quitGame() {
@@ -3905,28 +4112,46 @@
                 saveCurrentProgress();
                 
                 // Révéler tous les pays manquants
-                revealMissingCountries();
+                if (selectedMode === 'drapeaux') {
+                    revealMissingFlags();
+                } else {
+                    revealMissingCountries();
+                }
                 
                 // Désactiver les inputs selon le mode
                 if (selectedMode === 'expert') {
                     document.getElementById('expertCountryInput').disabled = true;
                     document.getElementById('expertCapitalInput').disabled = true;
                     document.getElementById('expertValidateBtn').disabled = true;
+                } else if (selectedMode === 'drapeaux') {
+                    document.querySelectorAll('.flag-item input').forEach(input => input.disabled = true);
                 } else {
                     document.getElementById('countryInput').disabled = true;
                 }
                 
                 // Afficher un message d'abandon
-                const feedback = selectedMode === 'expert' 
-                    ? document.getElementById('expertFeedback')
-                    : document.getElementById('inputFeedback');
-                feedback.textContent = `🏳️ Partie abandonnée ! Tu as trouvé ${foundCountries.length}/${currentGameCountries.length} pays.`;
-                feedback.className = 'input-feedback show incorrect';
+                if (selectedMode !== 'drapeaux') {
+                    const feedback = selectedMode === 'expert' 
+                        ? document.getElementById('expertFeedback')
+                        : document.getElementById('inputFeedback');
+                    feedback.textContent = `🏳️ Partie abandonnée ! Tu as trouvé ${foundCountries.length}/${currentGameCountries.length} pays.`;
+                    feedback.className = 'input-feedback show incorrect';
+                }
                 
                 // Masquer les boutons d'action
                 document.getElementById('abandonGameBtn').style.display = 'none';
                 document.getElementById('quitGameBtn').textContent = '← Retour au menu';
             }
+        }
+
+        function revealMissingFlags() {
+            // Révéler tous les drapeaux non trouvés
+            document.querySelectorAll('.flag-item').forEach(flagItem => {
+                const iso2 = flagItem.dataset.iso2;
+                if (!foundCountries.includes(iso2)) {
+                    flagItem.classList.add('revealed');
+                }
+            });
         }
 
         function saveCurrentProgress() {
@@ -3936,7 +4161,7 @@
             console.log('Pays trouvés:', foundCountries);
             
             // Vérifier que selectedMode est valide
-            if (!['nomme-pays', 'capitales', 'expert'].includes(selectedMode)) {
+            if (!['nomme-pays', 'capitales', 'expert', 'drapeaux'].includes(selectedMode)) {
                 console.error('❌ selectedMode invalide:', selectedMode);
                 return;
             }
@@ -3946,7 +4171,8 @@
                 playerData[currentPlayer].stats = {
                     'nomme-pays': {},
                     'capitales': {},
-                    'expert': {}
+                    'expert': {},
+                    'drapeaux': {}
                 };
                 console.log('⚠️ Stats initialisées');
             }
