@@ -135,6 +135,25 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
 
+        .btn-secondary {
+            background: #00ACC1;
+            color: white;
+            border: 2px solid white;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background: #008A9E;
+        }
+
         .saved-players {
             background: #f7f7f7;
             padding: 20px;
@@ -1495,12 +1514,31 @@
                         Le jeu inclut les <strong>195 pays membres de l'ONU</strong>, répartis sur 5 continents :
                     </p>
                     <ul>
-                        <li><strong>Europe :</strong> 45 pays</li>
-                        <li><strong>Asie :</strong> 48 pays</li>
+                        <li><strong>Europe :</strong> 49 pays</li>
+                        <li><strong>Asie :</strong> 43 pays</li>
                         <li><strong>Afrique :</strong> 54 pays</li>
                         <li><strong>Amérique :</strong> 35 pays</li>
                         <li><strong>Océanie :</strong> 14 pays</li>
                     </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💾 Gestion des données</h3>
+                    <p>
+                        Sauvegarde et restaure tes profils de joueurs avec leurs statistiques et collections.
+                    </p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                        <button class="btn-primary" onclick="exportData()" style="flex: 1; min-width: 150px;">
+                            📤 Exporter mes données
+                        </button>
+                        <button class="btn-secondary" onclick="importData()" style="flex: 1; min-width: 150px;">
+                            📥 Importer des données
+                        </button>
+                    </div>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        💡 <strong>Astuce :</strong> Exporte régulièrement tes données pour les sauvegarder !
+                        Tu peux aussi les partager entre appareils.
+                    </p>
                 </div>
             </div>
         </div>
@@ -1883,6 +1921,111 @@
                 console.log('🔄 Rechargez la page pour repartir à zéro.');
                 location.reload();
             }
+        };
+
+        // 📤 Fonction pour exporter les données en JSON
+        window.exportData = function() {
+            try {
+                const dataToExport = {
+                    version: '1.0',
+                    exportDate: new Date().toISOString(),
+                    players: playerData
+                };
+                
+                const jsonString = JSON.stringify(dataToExport, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `geo-quiz-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                console.log('✅ Données exportées avec succès !');
+                alert('✅ Tes données ont été exportées !\n\nFichier téléchargé : ' + a.download);
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'export:', error);
+                alert('❌ Erreur lors de l\'export des données.');
+            }
+        };
+
+        // 📥 Fonction pour importer les données depuis un fichier JSON
+        window.importData = function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        // Vérifier la structure des données
+                        if (!importedData.players || typeof importedData.players !== 'object') {
+                            throw new Error('Format de fichier invalide');
+                        }
+                        
+                        // Demander confirmation
+                        const playerCount = Object.keys(importedData.players).length;
+                        const currentCount = Object.keys(playerData).length;
+                        
+                        let message = `📥 Importer ${playerCount} profil(s) ?\n\n`;
+                        
+                        if (currentCount > 0) {
+                            message += `⚠️ Tu as actuellement ${currentCount} profil(s).\n\n`;
+                            message += 'Choisis une option :\n';
+                            message += '- OK : Fusionner (garder les deux)\n';
+                            message += '- Annuler : Abandonner l\'import';
+                            
+                            if (confirm(message)) {
+                                // Fusionner les données
+                                Object.keys(importedData.players).forEach(playerName => {
+                                    if (playerData[playerName]) {
+                                        // Le joueur existe déjà, demander quoi faire
+                                        if (confirm(`Le profil "${playerName}" existe déjà.\n\nÉcraser avec les données importées ?`)) {
+                                            playerData[playerName] = importedData.players[playerName];
+                                        }
+                                    } else {
+                                        // Nouveau joueur, l'ajouter
+                                        playerData[playerName] = importedData.players[playerName];
+                                    }
+                                });
+                                
+                                savePlayerData();
+                                loadPlayers();
+                                
+                                alert('✅ Import réussi !\n\nLes profils ont été fusionnés.');
+                                console.log('✅ Données importées et fusionnées !');
+                            }
+                        } else {
+                            // Pas de profils existants, import direct
+                            if (confirm(message)) {
+                                playerData = importedData.players;
+                                savePlayerData();
+                                loadPlayers();
+                                
+                                alert('✅ Import réussi !\n\n' + playerCount + ' profil(s) importé(s).');
+                                console.log('✅ Données importées !');
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('❌ Erreur lors de l\'import:', error);
+                        alert('❌ Erreur lors de l\'import.\n\nVérifie que le fichier est valide.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
         };
 
         // 📊 Fonction utile pour voir les stats détaillées dans la console
