@@ -876,55 +876,65 @@
         .badge-modal-content {
             background: white;
             border-radius: 20px;
-            max-width: 900px;
-            max-height: 90vh;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 85vh;
             overflow-y: auto;
-            padding: 30px;
+            padding: 40px;
             position: relative;
         }
 
         .badge-modal-close {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
+            top: 20px;
+            right: 20px;
+            background: #f0f0f0;
             border: none;
-            font-size: 2em;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 1.5em;
             cursor: pointer;
-            color: #999;
-            transition: color 0.3s;
+            color: #666;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .badge-modal-close:hover {
+            background: #e0e0e0;
             color: #333;
         }
 
         .badge-modal-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            padding-right: 60px;
         }
 
         .badge-modal-icon {
-            font-size: 5em;
+            font-size: 4em;
             margin-bottom: 15px;
         }
 
         .badge-modal-header h2 {
-            font-size: 2em;
+            font-size: 2.2em;
             color: #00838F;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .badge-modal-progress {
-            font-size: 1.3em;
+            font-size: 1.5em;
             color: #666;
             font-weight: bold;
         }
 
         .badge-modal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+            padding: 20px;
         }
 
         /* ========================================
@@ -2642,23 +2652,32 @@
             let mastered = 0;
             let total = 0;
 
-            const zoneMap = {
-                'monde': null,
-                'europe': 'Europe',
-                'asie': 'Asie',
-                'afrique': 'Afrique',
-                'amerique-nord': 'Amérique du Nord',
-                'amerique-sud': 'Amérique du Sud',
-                'oceanie': 'Océanie'
-            };
-
-            const continentName = zoneMap[zone];
+            // Pays d'Amérique du Nord (23 pays)
+            const ameriqueNordISO = ['CA', 'US', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'CU', 'JM', 'HT', 'DO', 'BS', 'BB', 'TT', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN'];
+            
+            // Pays d'Amérique du Sud (12 pays)
+            const ameriqueSudISO = ['BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR'];
 
             countriesData.forEach(country => {
-                // Filtrer par zone si ce n'est pas "monde"
-                if (continentName && country.continent !== continentName) {
-                    return;
+                let include = false;
+
+                if (zone === 'monde') {
+                    include = true;
+                } else if (zone === 'europe') {
+                    include = country.continent === 'Europe';
+                } else if (zone === 'asie') {
+                    include = country.continent === 'Asie';
+                } else if (zone === 'afrique') {
+                    include = country.continent === 'Afrique';
+                } else if (zone === 'amerique-nord') {
+                    include = ameriqueNordISO.includes(country.iso2);
+                } else if (zone === 'amerique-sud') {
+                    include = ameriqueSudISO.includes(country.iso2);
+                } else if (zone === 'oceanie') {
+                    include = country.continent === 'Océanie';
                 }
+
+                if (!include) return;
 
                 total++;
 
@@ -2672,7 +2691,7 @@
                 }
             });
 
-            const percent = Math.round((mastered / total) * 100);
+            const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
 
             return { mastered, total, percent };
         }
@@ -2739,25 +2758,34 @@
             const nommePaysStats = stats['nomme-pays'] || {};
             const expertStats = stats['expert'] || {};
 
-            const zoneMap = {
-                'monde': null,
-                'europe': 'Europe',
-                'asie': 'Asie',
-                'afrique': 'Afrique',
-                'amerique-nord': 'Amérique du Nord',
-                'amerique-sud': 'Amérique du Sud',
-                'oceanie': 'Océanie'
-            };
-
-            const continentName = zoneMap[badge.zone];
+            // Pays d'Amérique du Nord (23 pays)
+            const ameriqueNordISO = ['CA', 'US', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'CU', 'JM', 'HT', 'DO', 'BS', 'BB', 'TT', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN'];
+            
+            // Pays d'Amérique du Sud (12 pays)
+            const ameriqueSudISO = ['BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR'];
 
             let gridHtml = '';
 
             countriesData.forEach(country => {
-                // Filtrer par zone
-                if (continentName && country.continent !== continentName) {
-                    return;
+                let include = false;
+
+                if (badge.zone === 'monde') {
+                    include = true;
+                } else if (badge.zone === 'europe') {
+                    include = country.continent === 'Europe';
+                } else if (badge.zone === 'asie') {
+                    include = country.continent === 'Asie';
+                } else if (badge.zone === 'afrique') {
+                    include = country.continent === 'Afrique';
+                } else if (badge.zone === 'amerique-nord') {
+                    include = ameriqueNordISO.includes(country.iso2);
+                } else if (badge.zone === 'amerique-sud') {
+                    include = ameriqueSudISO.includes(country.iso2);
+                } else if (badge.zone === 'oceanie') {
+                    include = country.continent === 'Océanie';
                 }
+
+                if (!include) return;
 
                 const nommePaysCount = nommePaysStats[country.iso2] || 0;
                 const expertCount = expertStats[country.iso2] || 0;
