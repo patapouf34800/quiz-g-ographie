@@ -5542,13 +5542,14 @@
         }
 
         function endPopulationGame(exceeded) {
-            // Vérifier la contrainte géographique en mode enfer
-            if (!exceeded && populationGameState.difficulty === 'enfer') {
+            // Vérifier la contrainte géographique en mode enfer (toujours, même si dépassement)
+            if (populationGameState.difficulty === 'enfer') {
                 const geoCheck = checkGeographicConstraint();
                 if (!geoCheck.valid) {
+                    const raison = exceeded ? 'Tu as dépassé ET' : 'Tu n\'as pas respecté la contrainte :';
                     alert(`🌍 CONTRAINTE GÉOGRAPHIQUE NON RESPECTÉE !
 
-En mode ENFER, tu dois avoir au moins un pays de chaque continent :
+${raison} tu dois avoir au moins un pays de chaque continent :
 - Europe
 - Asie
 - Afrique
