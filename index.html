@@ -1094,10 +1094,10 @@
                                 <div class="mode-name">Nomme les pays</div>
                                 <div class="mode-description">Trouve tous les pays de la zone</div>
                             </div>
-                            <div class="mode-card disabled" data-mode="capitales">
+                            <div class="mode-card" data-mode="capitales">
                                 <div class="mode-icon">🏛️</div>
                                 <div class="mode-name">Capitales</div>
-                                <div class="mode-description">Bientôt disponible</div>
+                                <div class="mode-description">Trouve les capitales des pays</div>
                             </div>
                             <div class="mode-card disabled" data-mode="drapeaux">
                                 <div class="mode-icon">🏴</div>
@@ -1775,6 +1775,49 @@
             }, 2000);
         }
 
+        // 🔧 MODE DEV : Auto-complétion pour le mode Capitales
+        function devAutoCompleteCapitals() {
+            console.log('🔧 MODE DEV : Auto-complétion Capitales activée');
+            
+            // Trier les pays alphabétiquement
+            const sortedCountries = [...currentGameCountries].sort((a, b) => 
+                a.nom.localeCompare(b.nom, 'fr')
+            );
+            
+            // Ajouter tous les pays sauf le premier
+            sortedCountries.slice(1).forEach(country => {
+                if (!foundCountries.includes(country.iso2)) {
+                    foundCountries.push(country.iso2);
+                    
+                    // Colorer sur la carte
+                    if (currentMap) {
+                        currentMap.colorCountry(country.nom);
+                    }
+                    
+                    // Ajouter à la collection du joueur
+                    if (!playerData[currentPlayer].collection.includes(country.iso2)) {
+                        playerData[currentPlayer].collection.push(country.iso2);
+                    }
+                }
+            });
+            
+            // Sauvegarder
+            savePlayerData();
+            
+            // Mettre à jour l'affichage
+            updateFoundList();
+            updateGameStats();
+            
+            // Message
+            const feedback = document.getElementById('inputFeedback');
+            feedback.textContent = `🔧 DEV : ${foundCountries.length}/${currentGameCountries.length} capitales ajoutées !`;
+            feedback.className = 'input-feedback show correct';
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+
         async function startGame() {
             if (!selectedZone) {
                 alert('⚠️ Choisis d\'abord une zone géographique !');
@@ -1821,8 +1864,24 @@
                 'oceanie': 'Océanie'
             };
 
-            // Mettre à jour l'interface
-            document.getElementById('gameTitle').textContent = `🗺️ Nomme les pays - ${zoneNames[selectedZone]}`;
+            // Mettre à jour l'interface selon le mode
+            const modeIcons = {
+                'nomme-pays': '🗺️',
+                'capitales': '🏛️'
+            };
+            
+            const modeTitles = {
+                'nomme-pays': 'Nomme les pays',
+                'capitales': 'Capitales'
+            };
+            
+            const placeholders = {
+                'nomme-pays': 'Tape le nom d\'un pays...',
+                'capitales': 'Tape le nom d\'une capitale...'
+            };
+            
+            document.getElementById('gameTitle').textContent = `${modeIcons[selectedMode]} ${modeTitles[selectedMode]} - ${zoneNames[selectedZone]}`;
+            document.getElementById('countryInput').placeholder = placeholders[selectedMode];
             document.getElementById('foundCount').textContent = '0';
             document.getElementById('totalCount').textContent = currentGameCountries.length;
             document.getElementById('gamePercentage').textContent = '0%';
@@ -1869,6 +1928,15 @@
         }
 
         function checkCountry() {
+            // Router vers la bonne fonction selon le mode
+            if (selectedMode === 'capitales') {
+                checkCapital();
+            } else {
+                checkCountryName();
+            }
+        }
+
+        function checkCountryName() {
             const input = document.getElementById('countryInput');
             const feedback = document.getElementById('inputFeedback');
             const guess = input.value.trim();
@@ -1943,6 +2011,83 @@
             } else {
                 // INCORRECT
                 feedback.textContent = `❌ "${guess}" n'est pas reconnu ou n'est pas dans cette zone`;
+                feedback.className = 'input-feedback show incorrect';
+                input.value = '';
+
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        function checkCapital() {
+            const input = document.getElementById('countryInput');
+            const feedback = document.getElementById('inputFeedback');
+            const guess = input.value.trim();
+
+            if (!guess) return;
+
+            // 🔧 MODE DEV : Touche "9" pour auto-compléter (sauf le premier pays)
+            if (guess === '9') {
+                devAutoCompleteCapitals();
+                input.value = '';
+                return;
+            }
+
+            const normalizedGuess = normalizeString(guess);
+
+            // Chercher le pays par sa capitale
+            const country = currentGameCountries.find(c => {
+                const normalizedCapital = normalizeString(c.capitale);
+                return normalizedCapital === normalizedGuess;
+            });
+
+            if (country) {
+                // Vérifier si déjà trouvé
+                if (foundCountries.includes(country.iso2)) {
+                    feedback.textContent = `✅ ${country.capitale} (${country.nom}) est déjà trouvé !`;
+                    feedback.className = 'input-feedback show incorrect';
+                    input.value = '';
+                    
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                    }, 2000);
+                    return;
+                }
+
+                // CORRECT !
+                foundCountries.push(country.iso2);
+                
+                // Colorer sur la carte
+                if (currentMap) {
+                    currentMap.colorCountry(country.nom);
+                }
+
+                // Ajouter à la collection du joueur
+                if (!playerData[currentPlayer].collection.includes(country.iso2)) {
+                    playerData[currentPlayer].collection.push(country.iso2);
+                    savePlayerData();
+                }
+
+                // Feedback positif
+                feedback.textContent = `✅ Bravo ! ${country.capitale} est la capitale de ${country.nom} 🎉`;
+                feedback.className = 'input-feedback show correct';
+
+                // Mettre à jour la liste complète
+                updateFoundList();
+
+                // Mettre à jour les stats
+                updateGameStats();
+
+                input.value = '';
+
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+
+            } else {
+                // INCORRECT
+                feedback.textContent = `❌ "${guess}" n'est pas une capitale de cette zone`;
                 feedback.className = 'input-feedback show incorrect';
                 input.value = '';
 
