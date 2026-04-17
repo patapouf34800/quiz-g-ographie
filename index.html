@@ -2837,9 +2837,14 @@
                     const status = getBadgeStatus(progress.percent);
                     const medal = getMedalEmoji(status);
 
+                    // Utiliser l'émoji pour "Capitales du Monde", image pour les autres
+                    const badgeVisual = badge.id === 'capitales-monde' 
+                        ? `<div class="badge-card-emoji">${badge.emoji}</div>`
+                        : `<div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>`;
+
                     html += `
                         <div class="badge-card ${status}" onclick="openBadgeModal('${badge.id}', 'capitales')">
-                            <div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>
+                            ${badgeVisual}
                             <div class="badge-${status === 'locked' ? 'lock' : 'medal'}">${medal}</div>
                             <div class="badge-name">${badge.name}</div>
                             <div class="badge-progress">${progress.mastered}/${progress.total} (${progress.percent}%)</div>
