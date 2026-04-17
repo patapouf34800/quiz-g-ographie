@@ -26,6 +26,11 @@
             box-sizing: border-box;
         }
 
+        /* Classe utilitaire globale */
+        .hidden {
+            display: none !important;
+        }
+
         body {
             font-family: 'Segoe UI', 'Arial', sans-serif;
             background: linear-gradient(135deg, #00838F 0%, #00ACC1 50%, #26C6DA 100%);
@@ -373,10 +378,6 @@
 
         .zone-selection-screen {
             display: block;
-        }
-
-        .zone-selection-screen.hidden {
-            display: none;
         }
 
         .btn-back {
@@ -1483,12 +1484,23 @@
 
             // Bouton continuer vers la sélection de zone
             document.getElementById('continueToZoneBtn').addEventListener('click', () => {
-                document.getElementById('gameModeSelection').classList.add('hidden');
-                document.getElementById('zoneSelectionScreen').classList.remove('hidden');
+                console.log('🔄 Continuer vers sélection de zone');
+                const modeSelection = document.getElementById('gameModeSelection');
+                const zoneSelection = document.getElementById('zoneSelectionScreen');
+                
+                console.log('Mode selection element:', modeSelection);
+                console.log('Zone selection element:', zoneSelection);
+                
+                modeSelection.classList.add('hidden');
+                zoneSelection.classList.remove('hidden');
+                
+                console.log('Mode selection hidden?', modeSelection.classList.contains('hidden'));
+                console.log('Zone selection hidden?', zoneSelection.classList.contains('hidden'));
             });
 
             // Bouton retour
             document.getElementById('backToModeBtn').addEventListener('click', () => {
+                console.log('🔄 Retour vers sélection de mode');
                 document.getElementById('zoneSelectionScreen').classList.add('hidden');
                 document.getElementById('gameModeSelection').classList.remove('hidden');
             });
