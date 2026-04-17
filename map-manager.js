@@ -244,7 +244,8 @@ class InteractiveMap {
     
     // Si on a un vrai SVG chargé, on colore l'élément
     if (this.svgElement) {
-      const countryElement = this.svgElement.getElementById(code);
+      // Utiliser querySelector pour éviter les conflits d'ID avec le reste du document
+      const countryElement = this.svgElement.querySelector(`path[id="${code}"]`);
       if (countryElement) {
         // Animation de succès: flash puis couleur finale
         countryElement.style.fill = '#FFE66D'; // Flash jaune
