@@ -2145,6 +2145,34 @@
             console.log(`═══════════════════════════════════\n`);
         };
 
+        // 🏆 Fonction pour afficher les statistiques de maîtrise
+        window.showMasteryStats = function(playerName = currentPlayer) {
+            if (!playerData[playerName]) {
+                console.log('❌ Joueur non trouvé');
+                return;
+            }
+            
+            // Sauvegarder le joueur actuel temporairement
+            const tempPlayer = currentPlayer;
+            currentPlayer = playerName;
+            
+            const masteryStats = calculateMasteryStats();
+            
+            console.log(`\n🏆 ═══════════════════════════════════`);
+            console.log(`   Statistiques de maîtrise - ${playerName}`);
+            console.log(`═══════════════════════════════════\n`);
+            console.log(`🌟 Cadres dorés (maîtrise pays): ${masteryStats.masteredCountries}`);
+            console.log(`🥉 Rubans bronze: ${masteryStats.bronzeRibbons}`);
+            console.log(`🥈 Rubans argent: ${masteryStats.silverRibbons}`);
+            console.log(`🥇 Rubans or: ${masteryStats.goldRibbons}`);
+            console.log(`💎 Perfect Masters (cadre OR + ruban OR): ${masteryStats.perfectMasters}`);
+            console.log(`\n📊 Total rubans: ${masteryStats.bronzeRibbons + masteryStats.silverRibbons + masteryStats.goldRibbons}`);
+            console.log(`═══════════════════════════════════\n`);
+            
+            // Restaurer le joueur actuel
+            currentPlayer = tempPlayer;
+        };
+
         // =====================================
         // SYSTÈME D'ONGLETS
         // =====================================
@@ -2255,6 +2283,74 @@
             });
             
             return discoveredCountries.size;
+        }
+
+        // 📊 Calculer les statistiques de maîtrise (cadres et rubans)
+        function calculateMasteryStats() {
+            if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
+                return {
+                    masteredCountries: 0,        // Cadres dorés
+                    bronzeRibbons: 0,            // Rubans bronze
+                    silverRibbons: 0,            // Rubans argent
+                    goldRibbons: 0,              // Rubans or
+                    perfectMasters: 0            // Cadre OR + Ruban OR
+                };
+            }
+            
+            const stats = playerData[currentPlayer].stats;
+            const nommePaysStats = stats['nomme-pays'] || {};
+            const capitalesStats = stats['capitales'] || {};
+            const expertStats = stats['expert'] || {};
+            
+            let masteredCountries = 0;
+            let bronzeRibbons = 0;
+            let silverRibbons = 0;
+            let goldRibbons = 0;
+            let perfectMasters = 0;
+            
+            countriesData.forEach(country => {
+                const nommePaysCount = nommePaysStats[country.iso2] || 0;
+                const capitalesCount = capitalesStats[country.iso2] || 0;
+                const expertCount = expertStats[country.iso2] || 0;
+                
+                // Calculer si le pays est découvert
+                const isDiscovered = (nommePaysCount > 0) || (expertCount > 0);
+                
+                if (!isDiscovered) return; // Skip les pays non découverts
+                
+                // Cadre doré : (Nomme + Expert) ≥ 6
+                const totalPaysCount = nommePaysCount + expertCount;
+                const isMastered = totalPaysCount >= 6;
+                if (isMastered) masteredCountries++;
+                
+                // Rubans : déterminer le niveau
+                const totalCapitalesCount = capitalesCount + expertCount;
+                let ribbonType = null;
+                
+                if (expertCount >= 6) {
+                    ribbonType = 'gold';
+                    goldRibbons++;
+                } else if (totalCapitalesCount >= 6) {
+                    ribbonType = 'silver';
+                    silverRibbons++;
+                } else if (totalCapitalesCount >= 1) {
+                    ribbonType = 'bronze';
+                    bronzeRibbons++;
+                }
+                
+                // Perfect Master : Cadre OR + Ruban OR
+                if (isMastered && ribbonType === 'gold') {
+                    perfectMasters++;
+                }
+            });
+            
+            return {
+                masteredCountries,    // Nombre de cadres dorés
+                bronzeRibbons,        // Nombre de rubans bronze
+                silverRibbons,        // Nombre de rubans argent
+                goldRibbons,          // Nombre de rubans or
+                perfectMasters        // Nombre de pays avec cadre OR + ruban OR
+            };
         }
 
         // Variable pour stocker le filtre de continent actuel
