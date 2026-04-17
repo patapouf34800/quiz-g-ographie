@@ -564,6 +564,38 @@
             cursor: pointer;
         }
 
+        .country-card.not-discovered {
+            opacity: 0.5;
+        }
+
+        .country-card.not-discovered .country-flag {
+            filter: grayscale(100%);
+        }
+
+        .country-card.not-discovered .country-name {
+            color: #999;
+        }
+
+        .country-card .country-name {
+            color: #333;
+        }
+
+        .flag-container {
+            width: 60px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .country-flag {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
         .country-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 172, 193, 0.3);
@@ -1966,17 +1998,19 @@
                 
                 // Vérifier si le pays a été découvert en mode "Nomme les pays"
                 const isDiscovered = nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0;
-                const grayscale = isDiscovered ? '' : 'filter: grayscale(100%); opacity: 0.4;';
                 
                 html += `
-                    <div class="country-card" title="${country.nom}">
-                        <img 
-                            src="./flags/${country.iso2.toLowerCase()}.png" 
-                            alt="${country.nom}"
-                            style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; ${grayscale}"
-                            onerror="this.style.display='none'"
-                        >
-                        <div style="font-size: 0.85em; text-align: center; margin-top: 5px; color: ${isDiscovered ? '#333' : '#999'};">
+                    <div class="country-card ${!isDiscovered ? 'not-discovered' : ''}" title="${country.nom}">
+                        <div class="flag-container">
+                            <img 
+                                src="./flags/${country.iso2.toLowerCase()}.png" 
+                                alt="${country.nom}"
+                                class="country-flag"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                            >
+                            <div class="flag-emoji" style="display:none; font-size: 2.5em;">🏴</div>
+                        </div>
+                        <div class="country-name" style="font-size: 0.85em; text-align: center; margin-top: 5px;">
                             ${country.nom}
                         </div>
                     </div>
