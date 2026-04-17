@@ -1959,6 +1959,37 @@
             document.getElementById('foundCount').textContent = foundCountries.length;
             const percentage = Math.round((foundCountries.length / currentGameCountries.length) * 100);
             document.getElementById('gamePercentage').textContent = percentage + '%';
+            
+            // Vérifier si victoire (100%)
+            if (foundCountries.length === currentGameCountries.length) {
+                handleVictory();
+            }
+        }
+
+        function handleVictory() {
+            // Désactiver l'input
+            document.getElementById('countryInput').disabled = true;
+            
+            // Sauvegarder automatiquement
+            saveCurrentProgress();
+            
+            // Message de victoire
+            const zoneNames = {
+                'monde': 'le Monde',
+                'europe': 'l\'Europe',
+                'asie': 'l\'Asie',
+                'afrique': 'l\'Afrique',
+                'amerique-nord': 'l\'Amérique du Nord',
+                'amerique-sud': 'l\'Amérique du Sud',
+                'oceanie': 'l\'Océanie'
+            };
+            
+            alert(`🎉 FÉLICITATIONS ! 🎉\n\nTu as trouvé tous les pays de ${zoneNames[selectedZone]} !\n\n✨ ${currentGameCountries.length} pays découverts ! ✨`);
+            
+            // Retour automatique au menu après 500ms
+            setTimeout(() => {
+                returnToMenu();
+            }, 500);
         }
 
         function quitGame() {
