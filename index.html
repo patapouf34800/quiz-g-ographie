@@ -1688,12 +1688,13 @@
         // =====================================
 
         function normalizeString(str) {
-            // Normaliser pour la comparaison (enlever accents, minuscules, etc.)
+            // Normaliser pour la comparaison (enlever accents, minuscules, tirets, espaces)
             return str
                 .toLowerCase()
                 .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/['']/g, '')
+                .replace(/[\u0300-\u036f]/g, '') // Enlever les accents
+                .replace(/['']/g, '') // Enlever les apostrophes
+                .replace(/[-\s]/g, '') // Enlever les tirets et espaces
                 .trim();
         }
 
