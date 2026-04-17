@@ -581,6 +581,20 @@
             border: 2px solid #e0e0e0;
             transition: all 0.3s;
             cursor: pointer;
+            position: relative;
+        }
+
+        /* Carte maîtrisée (6+ fois) */
+        .country-card.mastered {
+            transform: scale(1.15);
+            border: 3px solid #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+        }
+
+        .country-card.mastered:hover {
+            transform: scale(1.2) translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.7);
         }
 
         .country-card.not-discovered {
@@ -597,6 +611,49 @@
 
         .country-card .country-name {
             color: #333;
+        }
+
+        /* Ruban de capitale */
+        .capital-ribbon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .capital-ribbon.bronze {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            border: 2px solid #8B4513;
+        }
+
+        .capital-ribbon.silver {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+            border: 2px solid #707070;
+        }
+
+        .capital-ribbon.gold {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: 2px solid #DAA520;
+            animation: goldPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes goldPulse {
+            0%, 100% {
+                box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                box-shadow: 0 4px 16px rgba(255, 215, 0, 0.8);
+            }
         }
 
         .flag-container {
@@ -2209,6 +2266,8 @@
             const grid = document.getElementById('collectionGrid');
             const stats = playerData[currentPlayer].stats || { 'nomme-pays': {}, 'capitales': {}, 'expert': {} };
             const nommePaysStats = stats['nomme-pays'] || {};
+            const capitalesStats = stats['capitales'] || {};
+            const expertStats = stats['expert'] || {};
             
             // Filtrer les pays par continent
             let filteredCountries = [...countriesData];
@@ -2257,8 +2316,29 @@
                 // Vérifier si le pays a été découvert en mode "Nomme les pays"
                 const isDiscovered = nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0;
                 
+                // Calculer le niveau de maîtrise
+                const nommePaysCount = nommePaysStats[country.iso2] || 0;
+                const capitalesCount = capitalesStats[country.iso2] || 0;
+                const expertCount = expertStats[country.iso2] || 0;
+                
+                // Déterminer si c'est un pays maîtrisé (6+ fois en nomme-pays)
+                const isMastered = nommePaysCount >= 6;
+                
+                // Déterminer le ruban de capitale
+                let capitalRibbon = '';
+                if (expertCount >= 6) {
+                    // Or : Expert 6+
+                    capitalRibbon = '<div class="capital-ribbon gold"><span>C</span></div>';
+                } else if (capitalesCount >= 6) {
+                    // Argent : Capitales 6+
+                    capitalRibbon = '<div class="capital-ribbon silver"><span>C</span></div>';
+                } else if (capitalesCount >= 1 || expertCount >= 1) {
+                    // Bronze : Au moins 1 fois
+                    capitalRibbon = '<div class="capital-ribbon bronze"><span>C</span></div>';
+                }
+                
                 html += `
-                    <div class="country-card ${!isDiscovered ? 'not-discovered' : ''}" title="${country.nom}" data-iso="${country.iso2}">
+                    <div class="country-card ${!isDiscovered ? 'not-discovered' : ''} ${isMastered ? 'mastered' : ''}" title="${country.nom}" data-iso="${country.iso2}">
                         <div class="flag-container">
                             <img 
                                 src="./flags/${country.iso2.toLowerCase()}.png" 
@@ -2270,6 +2350,7 @@
                                 ${country.iso2}
                             </div>
                         </div>
+                        ${capitalRibbon}
                         <div class="country-name" style="font-size: 0.85em; text-align: center; margin-top: 5px;">
                             ${country.nom}
                         </div>
