@@ -902,6 +902,61 @@
             border: 2px solid #F56565;
         }
 
+        /* Zone Expert avec deux inputs */
+        .input-zone-expert {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 3px solid #00ACC1;
+        }
+
+        .expert-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .expert-inputs input {
+            flex: 1;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Segoe UI', Arial;
+        }
+
+        .expert-inputs input:focus {
+            outline: none;
+            border-color: #00ACC1;
+            box-shadow: 0 0 0 3px rgba(0, 172, 193, 0.1);
+        }
+
+        .equals-sign {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00838F;
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, #48BB78, #38A169);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
         .found-countries {
             background: #f7f7f7;
             padding: 20px;
@@ -1373,7 +1428,7 @@
             </div>
 
             <!-- Zone de saisie -->
-            <div class="input-zone">
+            <div class="input-zone" id="singleInputZone">
                 <input 
                     type="text" 
                     id="countryInput" 
@@ -1381,6 +1436,27 @@
                     autocomplete="off"
                 >
                 <div class="input-feedback" id="inputFeedback"></div>
+            </div>
+
+            <!-- Zone de saisie Expert (deux champs) -->
+            <div class="input-zone-expert hidden" id="expertInputZone">
+                <div class="expert-inputs">
+                    <input 
+                        type="text" 
+                        id="expertCountryInput" 
+                        placeholder="Tape le nom du pays..."
+                        autocomplete="off"
+                    >
+                    <span class="equals-sign">=</span>
+                    <input 
+                        type="text" 
+                        id="expertCapitalInput" 
+                        placeholder="Tape la capitale..."
+                        autocomplete="off"
+                    >
+                    <button class="btn-validate" id="expertValidateBtn">✓ Valider</button>
+                </div>
+                <div class="input-feedback" id="expertFeedback"></div>
             </div>
 
             <!-- Liste des pays trouvés -->
@@ -1932,12 +2008,25 @@
             };
             
             document.getElementById('gameTitle').textContent = `${modeIcons[selectedMode]} ${modeTitles[selectedMode]} - ${zoneNames[selectedZone]}`;
-            document.getElementById('countryInput').placeholder = placeholders[selectedMode];
+            
+            // Gérer l'affichage des inputs selon le mode
+            if (selectedMode === 'expert') {
+                document.getElementById('singleInputZone').classList.add('hidden');
+                document.getElementById('expertInputZone').classList.remove('hidden');
+                document.getElementById('expertCountryInput').value = '';
+                document.getElementById('expertCapitalInput').value = '';
+                document.getElementById('expertFeedback').classList.remove('show');
+            } else {
+                document.getElementById('expertInputZone').classList.add('hidden');
+                document.getElementById('singleInputZone').classList.remove('hidden');
+                document.getElementById('countryInput').placeholder = placeholders[selectedMode];
+                document.getElementById('countryInput').value = '';
+                document.getElementById('inputFeedback').classList.remove('show');
+            }
+            
             document.getElementById('foundCount').textContent = '0';
             document.getElementById('totalCount').textContent = currentGameCountries.length;
             document.getElementById('gamePercentage').textContent = '0%';
-            document.getElementById('countryInput').value = '';
-            document.getElementById('inputFeedback').classList.remove('show');
             
             // Afficher la liste complète dès le début (avec cases vides)
             updateFoundList();
@@ -1949,8 +2038,12 @@
             // Charger la carte SVG
             await loadGameMap();
 
-            // Focus sur l'input
-            document.getElementById('countryInput').focus();
+            // Focus sur l'input approprié
+            if (selectedMode === 'expert') {
+                document.getElementById('expertCountryInput').focus();
+            } else {
+                document.getElementById('countryInput').focus();
+            }
         }
 
         async function loadGameMap() {
@@ -2151,34 +2244,50 @@
         }
 
         function checkExpert() {
-            const input = document.getElementById('countryInput');
-            const feedback = document.getElementById('inputFeedback');
-            const guess = input.value.trim();
+            const countryInput = document.getElementById('expertCountryInput');
+            const capitalInput = document.getElementById('expertCapitalInput');
+            const feedback = document.getElementById('expertFeedback');
+            
+            const guessCountry = countryInput.value.trim();
+            const guessCapital = capitalInput.value.trim();
 
-            if (!guess) return;
+            if (!guessCountry && !guessCapital) return;
 
-            // 🔧 MODE DEV : Touche "9" pour auto-compléter (sauf le premier pays)
-            if (guess === '9') {
+            // 🔧 MODE DEV : Touche "9" pour auto-compléter
+            if (guessCountry === '9' || guessCapital === '9') {
                 devAutoCompleteExpert();
-                input.value = '';
+                countryInput.value = '';
+                capitalInput.value = '';
                 return;
             }
 
-            const normalizedGuess = normalizeString(guess);
+            if (!guessCountry || !guessCapital) {
+                feedback.textContent = `⚠️ Il faut remplir les DEUX champs !`;
+                feedback.className = 'input-feedback show incorrect';
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+                return;
+            }
 
-            // Chercher le pays par son nom OU sa capitale
+            const normalizedCountry = normalizeString(guessCountry);
+            const normalizedCapital = normalizeString(guessCapital);
+
+            // Chercher le pays correspondant
             const country = currentGameCountries.find(c => {
-                const normalizedName = normalizeString(c.nom);
-                const normalizedCapital = normalizeString(c.capitale);
-                return normalizedName === normalizedGuess || normalizedCapital === normalizedGuess;
+                const matchCountry = normalizeString(c.nom) === normalizedCountry;
+                const matchCapital = normalizeString(c.capitale) === normalizedCapital;
+                return matchCountry && matchCapital;
             });
 
             if (country) {
                 // Vérifier si déjà trouvé
                 if (foundCountries.includes(country.iso2)) {
-                    feedback.textContent = `✅ ${country.nom} (${country.capitale}) est déjà trouvé !`;
+                    feedback.textContent = `✅ ${country.nom} = ${country.capitale} est déjà trouvé !`;
                     feedback.className = 'input-feedback show incorrect';
-                    input.value = '';
+                    countryInput.value = '';
+                    capitalInput.value = '';
                     
                     setTimeout(() => {
                         feedback.classList.remove('show');
@@ -2200,13 +2309,8 @@
                     savePlayerData();
                 }
 
-                // Feedback positif selon ce qui a été tapé
-                const wasPays = normalizeString(country.nom) === normalizedGuess;
-                if (wasPays) {
-                    feedback.textContent = `✅ Bravo ! ${country.nom} (capitale: ${country.capitale}) 🎉`;
-                } else {
-                    feedback.textContent = `✅ Bravo ! ${country.capitale} est la capitale de ${country.nom} 🎉`;
-                }
+                // Feedback positif
+                feedback.textContent = `✅ BRAVO ! ${country.nom} = ${country.capitale} 🎉`;
                 feedback.className = 'input-feedback show correct';
 
                 // Mettre à jour la liste complète
@@ -2215,17 +2319,31 @@
                 // Mettre à jour les stats
                 updateGameStats();
 
-                input.value = '';
+                countryInput.value = '';
+                capitalInput.value = '';
 
                 setTimeout(() => {
                     feedback.classList.remove('show');
                 }, 2000);
 
             } else {
-                // INCORRECT
-                feedback.textContent = `❌ "${guess}" n'est ni un pays ni une capitale de cette zone`;
+                // INCORRECT - vérifier ce qui est faux
+                const countryExists = currentGameCountries.find(c => normalizeString(c.nom) === normalizedCountry);
+                const capitalExists = currentGameCountries.find(c => normalizeString(c.capitale) === normalizedCapital);
+                
+                if (!countryExists && !capitalExists) {
+                    feedback.textContent = `❌ Ce pays ET cette capitale ne sont pas dans cette zone`;
+                } else if (!countryExists) {
+                    feedback.textContent = `❌ "${guessCountry}" n'est pas un pays de cette zone`;
+                } else if (!capitalExists) {
+                    feedback.textContent = `❌ "${guessCapital}" n'est pas une capitale de cette zone`;
+                } else {
+                    feedback.textContent = `❌ Ce n'est pas la bonne association ! ${guessCountry} ≠ ${guessCapital}`;
+                }
+                
                 feedback.className = 'input-feedback show incorrect';
-                input.value = '';
+                countryInput.value = '';
+                capitalInput.value = '';
 
                 setTimeout(() => {
                     feedback.classList.remove('show');
@@ -2241,8 +2359,87 @@
         function updateFoundList() {
             const foundList = document.getElementById('foundList');
             
-            // MODE CAPITALES ou EXPERT : Afficher tous les pays avec "= ???" ou "= Capitale"
-            if (selectedMode === 'capitales' || selectedMode === 'expert') {
+            // MODE EXPERT : Afficher ???? = ???? puis pays = capitale quand trouvé
+            if (selectedMode === 'expert') {
+                const allCountries = currentGameCountries.map(country => ({
+                    ...country,
+                    found: foundCountries.includes(country.iso2)
+                }));
+
+                if (selectedZone === 'monde') {
+                    const continents = ['Afrique', 'Amérique', 'Asie', 'Europe', 'Océanie'];
+                    let html = '';
+
+                    continents.forEach(continent => {
+                        const countriesInContinent = allCountries
+                            .filter(c => c.continent === continent)
+                            .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                        if (countriesInContinent.length > 0) {
+                            html += `
+                                <div class="continent-group">
+                                    <h4 class="continent-title">${continent}</h4>
+                                    <div class="continent-countries">
+                            `;
+
+                            countriesInContinent.forEach(country => {
+                                if (country.found) {
+                                    html += `
+                                        <div class="found-item">
+                                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                                 alt="${country.nom}" 
+                                                 class="flag-img"
+                                                 onerror="this.style.display='none'">
+                                            <span>${country.nom} = ${country.capitale}</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    html += `
+                                        <div class="empty-item">
+                                            <span class="empty-flag">⬜</span>
+                                            <span class="empty-name">???? = ????</span>
+                                        </div>
+                                    `;
+                                }
+                            });
+
+                            html += `
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    foundList.innerHTML = html;
+                } else {
+                    allCountries.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                    foundList.innerHTML = allCountries.map(country => {
+                        if (country.found) {
+                            return `
+                                <div class="found-item">
+                                    <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                         alt="${country.nom}" 
+                                         class="flag-img"
+                                         onerror="this.style.display='none'">
+                                    <span>${country.nom} = ${country.capitale}</span>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="empty-item">
+                                    <span class="empty-flag">⬜</span>
+                                    <span class="empty-name">???? = ????</span>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+                }
+                return;
+            }
+            
+            // MODE CAPITALES : Afficher tous les pays avec "= ???" ou "= Capitale"
+            if (selectedMode === 'capitales') {
                 const allCountries = currentGameCountries.map(country => ({
                     ...country,
                     found: foundCountries.includes(country.iso2)
@@ -2413,14 +2610,22 @@
         }
 
         function handleVictory() {
-            // Désactiver l'input
-            document.getElementById('countryInput').disabled = true;
+            // Désactiver les inputs selon le mode
+            if (selectedMode === 'expert') {
+                document.getElementById('expertCountryInput').disabled = true;
+                document.getElementById('expertCapitalInput').disabled = true;
+                document.getElementById('expertValidateBtn').disabled = true;
+            } else {
+                document.getElementById('countryInput').disabled = true;
+            }
             
             // Sauvegarder automatiquement
             saveCurrentProgress();
             
             // Message de victoire
-            const feedback = document.getElementById('inputFeedback');
+            const feedback = selectedMode === 'expert' 
+                ? document.getElementById('expertFeedback')
+                : document.getElementById('inputFeedback');
             feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
             feedback.className = 'input-feedback show correct';
             
@@ -2470,11 +2675,19 @@
                 // Révéler tous les pays manquants
                 revealMissingCountries();
                 
-                // Désactiver l'input
-                document.getElementById('countryInput').disabled = true;
+                // Désactiver les inputs selon le mode
+                if (selectedMode === 'expert') {
+                    document.getElementById('expertCountryInput').disabled = true;
+                    document.getElementById('expertCapitalInput').disabled = true;
+                    document.getElementById('expertValidateBtn').disabled = true;
+                } else {
+                    document.getElementById('countryInput').disabled = true;
+                }
                 
                 // Afficher un message d'abandon
-                const feedback = document.getElementById('inputFeedback');
+                const feedback = selectedMode === 'expert' 
+                    ? document.getElementById('expertFeedback')
+                    : document.getElementById('inputFeedback');
                 feedback.textContent = `🏳️ Partie abandonnée ! Tu as trouvé ${foundCountries.length}/${currentGameCountries.length} pays.`;
                 feedback.className = 'input-feedback show incorrect';
                 
@@ -2612,17 +2825,37 @@
             currentGameCountries = [];
             currentMap = null;
             
-            // Réactiver l'input
+            // Réactiver les inputs
             const input = document.getElementById('countryInput');
             if (input) {
                 input.disabled = false;
                 input.value = '';
             }
             
-            // Masquer le feedback
+            const expertCountryInput = document.getElementById('expertCountryInput');
+            const expertCapitalInput = document.getElementById('expertCapitalInput');
+            const expertValidateBtn = document.getElementById('expertValidateBtn');
+            if (expertCountryInput) {
+                expertCountryInput.disabled = false;
+                expertCountryInput.value = '';
+            }
+            if (expertCapitalInput) {
+                expertCapitalInput.disabled = false;
+                expertCapitalInput.value = '';
+            }
+            if (expertValidateBtn) {
+                expertValidateBtn.disabled = false;
+            }
+            
+            // Masquer les feedbacks
             const feedback = document.getElementById('inputFeedback');
             if (feedback) {
                 feedback.classList.remove('show');
+            }
+            
+            const expertFeedback = document.getElementById('expertFeedback');
+            if (expertFeedback) {
+                expertFeedback.classList.remove('show');
             }
             
             // Réinitialiser les boutons à leur état d'origine
@@ -2652,6 +2885,23 @@
         document.getElementById('countryInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 checkCountry();
+            }
+        });
+
+        // Événements pour le mode Expert
+        document.getElementById('expertValidateBtn').addEventListener('click', () => {
+            checkExpert();
+        });
+
+        document.getElementById('expertCountryInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkExpert();
+            }
+        });
+
+        document.getElementById('expertCapitalInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkExpert();
             }
         });
 
