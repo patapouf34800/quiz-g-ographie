@@ -2229,7 +2229,7 @@
                     <ul style="margin-top: 10px;">
                         <li><strong>😊 Facile :</strong> Pas de limite de pays - Sélectionne autant de pays que tu veux</li>
                         <li><strong>😰 Difficile :</strong> Maximum 10 pays - Choisis bien tes pays !</li>
-                        <li><strong>🔥 Enfer :</strong> Maximum 10 pays + tu dois avoir au moins 1 pays par continent (Europe, Asie, Afrique, Amérique, Océanie)</li>
+                        <li><strong>🔥 Enfer :</strong> Maximum 10 pays + tu dois avoir au moins 1 pays par continent (Europe, Asie, Afrique, Amérique du Nord, Amérique du Sud, Océanie)</li>
                     </ul>
                     
                     <p style="font-size: 0.95em; color: #00838F; margin-top: 15px; font-weight: bold;">
@@ -2453,7 +2453,8 @@
                     <span id="continent-europe" class="continent-badge">🇪🇺 Europe</span>
                     <span id="continent-asie" class="continent-badge">🌏 Asie</span>
                     <span id="continent-afrique" class="continent-badge">🌍 Afrique</span>
-                    <span id="continent-amerique" class="continent-badge">🌎 Amérique</span>
+                    <span id="continent-amerique-nord" class="continent-badge">🌎 Am. Nord</span>
+                    <span id="continent-amerique-sud" class="continent-badge">🌎 Am. Sud</span>
                     <span id="continent-oceanie" class="continent-badge">🏝️ Océanie</span>
                 </div>
             </div>
@@ -5319,18 +5320,13 @@
                 return true; // Pas de contrainte pour les autres modes
             }
             
-            // Définir les continents requis
-            const requiredContinents = ['Europe', 'Asie', 'Afrique', 'Amérique', 'Océanie'];
+            // Définir les continents requis (6 continents en mode enfer)
+            const requiredContinents = ['Europe', 'Asie', 'Afrique', 'Amérique du Nord', 'Amérique du Sud', 'Océanie'];
             
-            // Compter les continents représentés
+            // Compter les continents représentés (sans normalisation)
             const continents = new Set();
             populationGameState.selectedCountries.forEach(country => {
-                // Normaliser les continents américains
-                if (country.continent === 'Amérique du Nord' || country.continent === 'Amérique du Sud') {
-                    continents.add('Amérique');
-                } else {
-                    continents.add(country.continent);
-                }
+                continents.add(country.continent);
             });
             
             // Vérifier si tous les continents sont représentés
@@ -5394,15 +5390,10 @@
                 return;
             }
             
-            // Compter les continents représentés
+            // Compter les continents représentés (sans normalisation)
             const continents = new Set();
             populationGameState.selectedCountries.forEach(country => {
-                // Normaliser les continents américains
-                if (country.continent === 'Amérique du Nord' || country.continent === 'Amérique du Sud') {
-                    continents.add('Amérique');
-                } else {
-                    continents.add(country.continent);
-                }
+                continents.add(country.continent);
             });
             
             // Mettre à jour les badges
@@ -5410,7 +5401,8 @@
                 'Europe': 'continent-europe',
                 'Asie': 'continent-asie',
                 'Afrique': 'continent-afrique',
-                'Amérique': 'continent-amerique',
+                'Amérique du Nord': 'continent-amerique-nord',
+                'Amérique du Sud': 'continent-amerique-sud',
                 'Océanie': 'continent-oceanie'
             };
             
@@ -5534,7 +5526,8 @@ En mode ENFER, tu dois avoir au moins un pays de chaque continent :
 - Europe
 - Asie
 - Afrique
-- Amérique
+- Amérique du Nord
+- Amérique du Sud
 - Océanie
 
 Continents manquants : ${geoCheck.missingContinents.join(', ')}
