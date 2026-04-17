@@ -5320,13 +5320,26 @@
                 return true; // Pas de contrainte pour les autres modes
             }
             
+            // Codes ISO2 pour classifier les Amériques
+            const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
+            const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
+            
             // Définir les continents requis (6 continents en mode enfer)
             const requiredContinents = ['Europe', 'Asie', 'Afrique', 'Amérique du Nord', 'Amérique du Sud', 'Océanie'];
             
-            // Compter les continents représentés (sans normalisation)
+            // Compter les continents représentés
             const continents = new Set();
             populationGameState.selectedCountries.forEach(country => {
-                continents.add(country.continent);
+                if (country.continent === 'Amérique') {
+                    // Classifier selon le code ISO2
+                    if (americaNorthCodes.includes(country.iso2)) {
+                        continents.add('Amérique du Nord');
+                    } else if (americaSouthCodes.includes(country.iso2)) {
+                        continents.add('Amérique du Sud');
+                    }
+                } else {
+                    continents.add(country.continent);
+                }
             });
             
             // Vérifier si tous les continents sont représentés
@@ -5390,10 +5403,23 @@
                 return;
             }
             
-            // Compter les continents représentés (sans normalisation)
+            // Codes ISO2 pour classifier les Amériques
+            const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
+            const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
+            
+            // Compter les continents représentés
             const continents = new Set();
             populationGameState.selectedCountries.forEach(country => {
-                continents.add(country.continent);
+                if (country.continent === 'Amérique') {
+                    // Classifier selon le code ISO2
+                    if (americaNorthCodes.includes(country.iso2)) {
+                        continents.add('Amérique du Nord');
+                    } else if (americaSouthCodes.includes(country.iso2)) {
+                        continents.add('Amérique du Sud');
+                    }
+                } else {
+                    continents.add(country.continent);
+                }
             });
             
             // Mettre à jour les badges
