@@ -1588,8 +1588,9 @@
             <div class="tab-content active" id="playTab">
                 <!-- Sélection du mode de jeu -->
                 <div class="game-mode-selection" id="gameModeSelection">
+                    <!-- Jeux classiques -->
                     <div class="config-section">
-                        <h3>🎮 Choisis un mode de jeu</h3>
+                        <h3>🎮 Jeux classiques</h3>
                         <div class="mode-selection">
                             <div class="mode-card selected" data-mode="nomme-pays">
                                 <div class="mode-icon">🗺️</div>
@@ -1612,8 +1613,21 @@
                                 <div class="mode-description">Reconnais 10 drapeaux</div>
                             </div>
                         </div>
-                        <button class="btn-continue" id="continueToZoneBtn">Continuer →</button>
                     </div>
+
+                    <!-- Jeux spéciaux -->
+                    <div class="config-section" style="margin-top: 25px;">
+                        <h3>✨ Jeux spéciaux</h3>
+                        <div class="mode-selection">
+                            <div class="mode-card" data-mode="limite-population">
+                                <div class="mode-icon">👥</div>
+                                <div class="mode-name">Ne dépasse pas la limite !</div>
+                                <div class="mode-description">Trouve des pays sans dépasser X millions d'habitants</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-continue" id="continueToZoneBtn">Continuer →</button>
                 </div>
 
                 <!-- Sélection de la zone (masquée par défaut) -->
@@ -1661,6 +1675,33 @@
                     </div>
 
                     <button class="btn-start-game" id="startGameBtn">🚀 Lancer le quiz !</button>
+                </div>
+
+                <!-- Sélection de la difficulté (pour le mode "limite-population") -->
+                <div class="difficulty-selection-screen hidden" id="difficultySelectionScreen">
+                    <button class="btn-back" id="backToModeFromDifficultyBtn">← Retour</button>
+                    <div class="config-section">
+                        <h3>⚡ Choisis ta difficulté</h3>
+                        <div class="zone-selection">
+                            <div class="zone-card" data-difficulty="facile">
+                                <div class="emoji">😊</div>
+                                <div class="name">Facile</div>
+                                <div class="count">Plus de temps</div>
+                            </div>
+                            <div class="zone-card" data-difficulty="difficile">
+                                <div class="emoji">😰</div>
+                                <div class="name">Difficile</div>
+                                <div class="count">Moins de temps</div>
+                            </div>
+                            <div class="zone-card" data-difficulty="enfer">
+                                <div class="emoji">🔥</div>
+                                <div class="name">Enfer</div>
+                                <div class="count">Challenge extrême</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-start-game" id="startGameFromDifficultyBtn">🚀 Lancer le quiz !</button>
                 </div>
             </div>
 
@@ -2496,6 +2537,7 @@
 
         let selectedMode = 'nomme-pays'; // Mode par défaut
         let selectedZone = null;
+        let selectedDifficulty = null; // Pour le mode "limite-population"
 
         function initModeSelection() {
             const modeCards = document.querySelectorAll('.mode-card:not(.disabled)');
@@ -2511,32 +2553,42 @@
                 });
             });
 
-            // Bouton continuer vers la sélection de zone
+            // Bouton continuer vers la sélection de zone OU difficulté
             document.getElementById('continueToZoneBtn').addEventListener('click', () => {
-                console.log('🔄 Continuer vers sélection de zone');
                 const modeSelection = document.getElementById('gameModeSelection');
-                const zoneSelection = document.getElementById('zoneSelectionScreen');
                 
-                console.log('Mode selection element:', modeSelection);
-                console.log('Zone selection element:', zoneSelection);
-                
-                modeSelection.classList.add('hidden');
-                zoneSelection.classList.remove('hidden');
-                
-                console.log('Mode selection hidden?', modeSelection.classList.contains('hidden'));
-                console.log('Zone selection hidden?', zoneSelection.classList.contains('hidden'));
+                // Si c'est le mode "limite-population", aller vers la difficulté
+                if (selectedMode === 'limite-population') {
+                    console.log('🔄 Continuer vers sélection de difficulté');
+                    const difficultySelection = document.getElementById('difficultySelectionScreen');
+                    modeSelection.classList.add('hidden');
+                    difficultySelection.classList.remove('hidden');
+                } else {
+                    // Sinon, aller vers la zone
+                    console.log('🔄 Continuer vers sélection de zone');
+                    const zoneSelection = document.getElementById('zoneSelectionScreen');
+                    modeSelection.classList.add('hidden');
+                    zoneSelection.classList.remove('hidden');
+                }
             });
 
-            // Bouton retour
+            // Bouton retour depuis la zone
             document.getElementById('backToModeBtn').addEventListener('click', () => {
                 console.log('🔄 Retour vers sélection de mode');
                 document.getElementById('zoneSelectionScreen').classList.add('hidden');
                 document.getElementById('gameModeSelection').classList.remove('hidden');
             });
+
+            // Bouton retour depuis la difficulté
+            document.getElementById('backToModeFromDifficultyBtn').addEventListener('click', () => {
+                console.log('🔄 Retour vers sélection de mode (depuis difficulté)');
+                document.getElementById('difficultySelectionScreen').classList.add('hidden');
+                document.getElementById('gameModeSelection').classList.remove('hidden');
+            });
         }
 
         function initZoneSelection() {
-            const zoneCards = document.querySelectorAll('.zone-card');
+            const zoneCards = document.querySelectorAll('.zone-card[data-zone]');
             
             zoneCards.forEach(card => {
                 card.addEventListener('click', () => {
@@ -2547,6 +2599,33 @@
                     card.classList.add('selected');
                     selectedZone = card.dataset.zone;
                 });
+            });
+        }
+
+        function initDifficultySelection() {
+            const difficultyCards = document.querySelectorAll('.zone-card[data-difficulty]');
+            
+            difficultyCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // Désélectionner toutes les cartes
+                    difficultyCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Sélectionner la carte cliquée
+                    card.classList.add('selected');
+                    selectedDifficulty = card.dataset.difficulty;
+                });
+            });
+
+            // Bouton lancer le jeu depuis la difficulté
+            document.getElementById('startGameFromDifficultyBtn').addEventListener('click', () => {
+                if (!selectedDifficulty) {
+                    alert('⚠️ Merci de sélectionner une difficulté');
+                    return;
+                }
+                
+                console.log('🚀 Lancer le jeu en mode:', selectedMode, 'difficulté:', selectedDifficulty);
+                // La logique du jeu sera ajoutée ici
+                alert(`Mode: ${selectedMode}\nDifficulté: ${selectedDifficulty}\n\nLe jeu sera implémenté prochainement !`);
             });
         }
 
@@ -4463,6 +4542,7 @@
             initTabs();
             initModeSelection(); // Initialiser la sélection de mode
             initZoneSelection();
+            initDifficultySelection(); // Initialiser la sélection de difficulté
             initContinentTabs(); // Initialiser les onglets de filtrage par continent
             loadCountriesData(); // Charger les données des pays
             
