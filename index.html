@@ -5048,15 +5048,21 @@
                         ${category.countries.map(country => `
                             <div class="country-item" data-iso2="${country.iso2}">
                                 <span class="country-name">${country.nom}</span>
-                                <span class="country-population">${formatPopulation(country.habitants)}</span>
                             </div>
                         `).join('')}
                     </div>
                 `;
                 
-                // Toggle expansion de la catégorie
+                // Toggle expansion de la catégorie (ouvrir ET fermer)
                 const header = card.querySelector('.category-header');
                 header.addEventListener('click', () => {
+                    // Fermer toutes les autres catégories d'abord
+                    document.querySelectorAll('.category-card').forEach(c => {
+                        if (c !== card) {
+                            c.classList.remove('expanded');
+                        }
+                    });
+                    // Toggle celle-ci
                     card.classList.toggle('expanded');
                 });
                 
@@ -5183,6 +5189,15 @@
             
             // Afficher l'écran de configuration
             document.getElementById('difficultySelectionScreen').classList.remove('hidden');
+            
+            // Nettoyer complètement l'interface
+            document.getElementById('categoriesGrid').innerHTML = '';
+            document.getElementById('selectedList').innerHTML = '<p class="empty-message">Aucun pays sélectionné pour le moment</p>';
+            document.getElementById('selectedCount').textContent = '0';
+            document.getElementById('currentPopulation').textContent = '0';
+            document.getElementById('targetPopulation').textContent = '0';
+            document.getElementById('remainingPopulation').textContent = '0';
+            document.getElementById('populationProgress').style.width = '0%';
             
             // Réinitialiser l'état
             populationGameState = {
