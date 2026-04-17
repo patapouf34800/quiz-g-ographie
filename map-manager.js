@@ -155,23 +155,13 @@ class InteractiveMap {
           
           // Effet hover
           path.addEventListener('mouseenter', (e) => {
-            const countryCode = e.target.id.toUpperCase(); // Normaliser en majuscules
-            
-            console.log('=== HOVER DEBUG ===');
-            console.log('ID brut:', e.target.id);
-            console.log('ID normalisé:', countryCode);
-            console.log('Pays trouvés:', Array.from(this.foundCountries));
-            console.log('Est trouvé?', this.foundCountries.has(countryCode));
-            console.log('Mapping existe?', this.codeToName[countryCode]);
-            console.log('Tooltip element:', this.tooltip);
+            const countryCode = e.target.id.toUpperCase();
             
             // Si le pays est trouvé, afficher le tooltip
             if (this.foundCountries.has(countryCode)) {
               const countryName = this.codeToName[countryCode] || countryCode;
-              console.log('→ Affichage tooltip pour:', countryName);
               this.tooltip.textContent = countryName;
               this.tooltip.style.display = 'block';
-              this.tooltip.style.backgroundColor = 'red'; // Test de visibilité
             } else {
               e.target.style.fill = '#D0D0D0';
             }
