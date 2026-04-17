@@ -2105,7 +2105,65 @@
         function updateFoundList() {
             const foundList = document.getElementById('foundList');
             
-            // Créer une liste complète avec pays trouvés et non trouvés
+            // MODE CAPITALES : Afficher "Pays = Capitale" uniquement pour les pays trouvés
+            if (selectedMode === 'capitales') {
+                const foundCountriesData = currentGameCountries
+                    .filter(c => foundCountries.includes(c.iso2))
+                    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                if (selectedZone === 'monde') {
+                    // Grouper par continent
+                    const continents = ['Afrique', 'Amérique', 'Asie', 'Europe', 'Océanie'];
+                    let html = '';
+
+                    continents.forEach(continent => {
+                        const countriesInContinent = foundCountriesData.filter(c => c.continent === continent);
+
+                        if (countriesInContinent.length > 0) {
+                            html += `
+                                <div class="continent-group">
+                                    <h4 class="continent-title">${continent}</h4>
+                                    <div class="continent-countries">
+                            `;
+
+                            countriesInContinent.forEach(country => {
+                                html += `
+                                    <div class="found-item">
+                                        <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                             alt="${country.nom}" 
+                                             class="flag-img"
+                                             onerror="this.style.display='none'">
+                                        <span>${country.nom} = ${country.capitale}</span>
+                                    </div>
+                                `;
+                            });
+
+                            html += `
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    foundList.innerHTML = html || '<p style="color: #999; text-align: center;">Aucune capitale trouvée encore...</p>';
+                } else {
+                    // Tri alphabétique simple
+                    foundList.innerHTML = foundCountriesData.map(country => {
+                        return `
+                            <div class="found-item">
+                                <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                     alt="${country.nom}" 
+                                     class="flag-img"
+                                     onerror="this.style.display='none'">
+                                <span>${country.nom} = ${country.capitale}</span>
+                            </div>
+                        `;
+                    }).join('') || '<p style="color: #999; text-align: center;">Aucune capitale trouvée encore...</p>';
+                }
+                return;
+            }
+
+            // MODE NOMME LES PAYS : Afficher tous les pays (trouvés + cases vides)
             const allCountries = currentGameCountries.map(country => ({
                 ...country,
                 found: foundCountries.includes(country.iso2)
