@@ -2238,19 +2238,23 @@
                 return 0;
             }
             
-            const allCountries = new Set();
+            const discoveredCountries = new Set();
             const stats = playerData[currentPlayer].stats;
             
-            // Collecter tous les pays de tous les modes
-            Object.values(stats).forEach(modeStats => {
-                Object.keys(modeStats).forEach(iso2 => {
-                    if (modeStats[iso2] > 0) {
-                        allCountries.add(iso2);
-                    }
-                });
+            const nommePaysStats = stats['nomme-pays'] || {};
+            const expertStats = stats['expert'] || {};
+            
+            // Un pays est découvert si : (Nomme ≥ 1) OU (Expert ≥ 1)
+            countriesData.forEach(country => {
+                const nommePaysCount = nommePaysStats[country.iso2] || 0;
+                const expertCount = expertStats[country.iso2] || 0;
+                
+                if (nommePaysCount > 0 || expertCount > 0) {
+                    discoveredCountries.add(country.iso2);
+                }
             });
             
-            return allCountries.size;
+            return discoveredCountries.size;
         }
 
         // Variable pour stocker le filtre de continent actuel
@@ -3392,8 +3396,14 @@
         function saveCurrentProgress() {
             console.log('💾 === SAUVEGARDE PROGRESSION ===');
             console.log('Joueur actuel:', currentPlayer);
-            console.log('Mode actuel:', selectedMode);
+            console.log('Mode actuel (selectedMode):', selectedMode);
             console.log('Pays trouvés:', foundCountries);
+            
+            // Vérifier que selectedMode est valide
+            if (!['nomme-pays', 'capitales', 'expert'].includes(selectedMode)) {
+                console.error('❌ selectedMode invalide:', selectedMode);
+                return;
+            }
             
             // Initialiser la structure si elle n'existe pas (rétrocompatibilité)
             if (!playerData[currentPlayer].stats) {
