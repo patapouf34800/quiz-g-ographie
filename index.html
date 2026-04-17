@@ -1974,30 +1974,30 @@
         // COLLECTION
         // =====================================
 
+        // Compter les pays uniques découverts (tous modes confondus)
+        function countDiscoveredCountries() {
+            if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
+                return 0;
+            }
+            
+            const allCountries = new Set();
+            const stats = playerData[currentPlayer].stats;
+            
+            // Collecter tous les pays de tous les modes
+            Object.values(stats).forEach(modeStats => {
+                Object.keys(modeStats).forEach(iso2 => {
+                    if (modeStats[iso2] > 0) {
+                        allCountries.add(iso2);
+                    }
+                });
+            });
+            
+            return allCountries.size;
+        }
+
         function updateCollectionDisplay() {
             if (!currentPlayer || !playerData[currentPlayer]) {
                 return;
-            }
-            
-            // Compter les pays uniques découverts (tous modes confondus)
-            function countDiscoveredCountries() {
-                if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
-                    return 0;
-                }
-                
-                const allCountries = new Set();
-                const stats = playerData[currentPlayer].stats;
-                
-                // Collecter tous les pays de tous les modes
-                Object.values(stats).forEach(modeStats => {
-                    Object.keys(modeStats).forEach(iso2 => {
-                        if (modeStats[iso2] > 0) {
-                            allCountries.add(iso2);
-                        }
-                    });
-                });
-                
-                return allCountries.size;
             }
             
             const grid = document.getElementById('collectionGrid');
@@ -2035,16 +2035,17 @@
                 const isDiscovered = nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0;
                 
                 html += `
-                    <div class="country-card ${!isDiscovered ? 'not-discovered' : ''}" title="${country.nom}">
+                    <div class="country-card ${!isDiscovered ? 'not-discovered' : ''}" title="${country.nom}" data-iso="${country.iso2}">
                         <div class="flag-container">
                             <img 
                                 src="./flags/${country.iso2.toLowerCase()}.png" 
                                 alt="${country.nom}"
                                 class="country-flag"
-                                onerror="console.log('❌ Image non chargée: ./flags/${country.iso2.toLowerCase()}.png'); this.style.display='none'; this.nextElementSibling.style.display='block';"
-                                onload="console.log('✅ Image chargée: ./flags/${country.iso2.toLowerCase()}.png');"
+                                onerror="this.style.display='none'; this.parentElement.querySelector('.flag-placeholder').style.display='flex';"
                             >
-                            <div class="flag-emoji" style="display:none; font-size: 2.5em;">🏴</div>
+                            <div class="flag-placeholder" style="display:none; width: 60px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 4px; border: 1px solid #ddd; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.7em;">
+                                ${country.iso2}
+                            </div>
                         </div>
                         <div class="country-name" style="font-size: 0.85em; text-align: center; margin-top: 5px;">
                             ${country.nom}
