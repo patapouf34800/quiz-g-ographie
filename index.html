@@ -863,6 +863,25 @@
             gap: 10px;
         }
 
+        .continent-group {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .continent-title {
+            color: #00838F;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #00ACC1;
+        }
+
+        .continent-countries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .found-item {
             background: white;
             padding: 8px 15px;
@@ -877,6 +896,26 @@
 
         .found-item .flag {
             font-size: 1.2em;
+        }
+
+        .empty-item {
+            background: #f5f5f5;
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 2px dashed #e0e0e0;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .empty-item .empty-flag {
+            font-size: 1.2em;
+            opacity: 0.5;
+        }
+
+        .empty-item .empty-name {
+            font-style: italic;
         }
 
         /* ========================================
@@ -1663,9 +1702,11 @@
             document.getElementById('foundCount').textContent = '0';
             document.getElementById('totalCount').textContent = currentGameCountries.length;
             document.getElementById('gamePercentage').textContent = '0%';
-            document.getElementById('foundList').innerHTML = '';
             document.getElementById('countryInput').value = '';
             document.getElementById('inputFeedback').classList.remove('show');
+            
+            // Afficher la liste complète dès le début (avec cases vides)
+            updateFoundList();
 
             // Masquer l'écran de config, afficher l'écran de jeu
             document.getElementById('configScreen').classList.add('hidden');
@@ -1749,8 +1790,8 @@
                 feedback.textContent = `✅ Bravo ! ${country.nom} 🎉`;
                 feedback.className = 'input-feedback show correct';
 
-                // Ajouter à la liste
-                addToFoundList(country);
+                // Mettre à jour la liste complète
+                updateFoundList();
 
                 // Mettre à jour les stats
                 updateGameStats();
@@ -1781,14 +1822,84 @@
         }
 
         function addToFoundList(country) {
+            // Ne rien faire ici, on va reconstruire toute la liste à chaque fois
+            updateFoundList();
+        }
+
+        function updateFoundList() {
             const foundList = document.getElementById('foundList');
-            const item = document.createElement('div');
-            item.className = 'found-item';
-            item.innerHTML = `
-                <span class="flag">${country.flag ? '🏴' : '🚩'}</span>
-                <span>${country.nom}</span>
-            `;
-            foundList.appendChild(item);
+            
+            // Créer une liste complète avec pays trouvés et non trouvés
+            const allCountries = currentGameCountries.map(country => ({
+                ...country,
+                found: foundCountries.includes(country.iso2)
+            }));
+
+            // Si c'est le monde entier, grouper par continent
+            if (selectedZone === 'monde') {
+                const continents = ['Afrique', 'Amérique', 'Asie', 'Europe', 'Océanie'];
+                let html = '';
+
+                continents.forEach(continent => {
+                    const countriesInContinent = allCountries
+                        .filter(c => c.continent === continent)
+                        .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                    if (countriesInContinent.length > 0) {
+                        html += `
+                            <div class="continent-group">
+                                <h4 class="continent-title">${continent}</h4>
+                                <div class="continent-countries">
+                        `;
+
+                        countriesInContinent.forEach(country => {
+                            if (country.found) {
+                                html += `
+                                    <div class="found-item">
+                                        <span class="flag">🏴</span>
+                                        <span>${country.nom}</span>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="empty-item">
+                                        <span class="empty-flag">⬜</span>
+                                        <span class="empty-name">?</span>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                foundList.innerHTML = html;
+            } else {
+                // Pour les autres zones, tri alphabétique simple
+                allCountries.sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+
+                foundList.innerHTML = allCountries.map(country => {
+                    if (country.found) {
+                        return `
+                            <div class="found-item">
+                                <span class="flag">🏴</span>
+                                <span>${country.nom}</span>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="empty-item">
+                                <span class="empty-flag">⬜</span>
+                                <span class="empty-name">?</span>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            }
         }
 
         function updateGameStats() {
