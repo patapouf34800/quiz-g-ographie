@@ -2313,27 +2313,31 @@
                     `;
                 }
                 
-                // Vérifier si le pays a été découvert en mode "Nomme les pays"
-                const isDiscovered = nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0;
+                // Vérifier si le pays a été découvert (Nomme les pays OU Expert)
+                const isDiscovered = (nommePaysStats[country.iso2] && nommePaysStats[country.iso2] > 0) || 
+                                     (expertStats[country.iso2] && expertStats[country.iso2] > 0);
                 
                 // Calculer le niveau de maîtrise
                 const nommePaysCount = nommePaysStats[country.iso2] || 0;
                 const capitalesCount = capitalesStats[country.iso2] || 0;
                 const expertCount = expertStats[country.iso2] || 0;
                 
-                // Déterminer si c'est un pays maîtrisé (6+ fois en nomme-pays)
-                const isMastered = nommePaysCount >= 6;
+                // Déterminer si c'est un pays maîtrisé (6+ fois en nomme-pays + expert)
+                const totalPaysCount = nommePaysCount + expertCount;
+                const isMastered = totalPaysCount >= 6;
                 
                 // Déterminer le ruban de capitale
                 let capitalRibbon = '';
+                const totalCapitalesCount = capitalesCount + expertCount;
+                
                 if (expertCount >= 6) {
-                    // Or : Expert 6+
+                    // Or : Expert 6+ (priorité absolue)
                     capitalRibbon = '<div class="capital-ribbon gold"><span>C</span></div>';
-                } else if (capitalesCount >= 6) {
-                    // Argent : Capitales 6+
+                } else if (totalCapitalesCount >= 6) {
+                    // Argent : (Capitales + Expert) 6+
                     capitalRibbon = '<div class="capital-ribbon silver"><span>C</span></div>';
-                } else if (capitalesCount >= 1 || expertCount >= 1) {
-                    // Bronze : Au moins 1 fois
+                } else if (totalCapitalesCount >= 1) {
+                    // Bronze : (Capitales + Expert) 1-5
                     capitalRibbon = '<div class="capital-ribbon bronze"><span>C</span></div>';
                 }
                 
