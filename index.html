@@ -1592,7 +1592,7 @@
             <div class="tab-content" id="badgesTab">
                 <div class="badges-header">
                     <h2>🏆 Mes Badges</h2>
-                    <p>Maîtrise les continents en obtenant des cadres dorés !</p>
+                    <p>Maîtrise les continents et débloque tous les badges !</p>
                 </div>
 
                 <div class="badges-section">
@@ -1600,6 +1600,15 @@
                     <p class="section-description">Obtiens un cadre doré sur chaque pays d'une zone</p>
                     
                     <div class="badges-grid" id="explorationBadges">
+                        <!-- Les badges seront générés dynamiquement -->
+                    </div>
+                </div>
+
+                <div class="badges-section">
+                    <h3>🏛️ Badges Capitales</h3>
+                    <p class="section-description">Obtiens un ruban argent sur chaque pays d'une zone</p>
+                    
+                    <div class="badges-grid" id="capitalesBadges">
                         <!-- Les badges seront générés dynamiquement -->
                     </div>
                 </div>
@@ -2640,6 +2649,16 @@
             { id: 'oceanie', name: 'Expert Océanie', emoji: '🦘', zone: 'oceanie', total: 14 }
         ];
 
+        const capitalesBadges = [
+            { id: 'capitales-monde', name: 'Capitales du Monde', emoji: '🌍', zone: 'monde', total: 195 },
+            { id: 'capitales-europe', name: 'Capitales d\'Europe', emoji: '🗼', zone: 'europe', total: 49 },
+            { id: 'capitales-asie', name: 'Capitales d\'Asie', emoji: '🏯', zone: 'asie', total: 43 },
+            { id: 'capitales-afrique', name: 'Capitales d\'Afrique', emoji: '🦁', zone: 'afrique', total: 54 },
+            { id: 'capitales-amerique-nord', name: 'Capitales d\'Amérique du Nord', emoji: '🗽', zone: 'amerique-nord', total: 23 },
+            { id: 'capitales-amerique-sud', name: 'Capitales d\'Amérique du Sud', emoji: '🗿', zone: 'amerique-sud', total: 12 },
+            { id: 'capitales-oceanie', name: 'Capitales d\'Océanie', emoji: '🦘', zone: 'oceanie', total: 14 }
+        ];
+
         function calculateBadgeProgress(zone) {
             if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
                 return { mastered: 0, total: 195, percent: 0 };
@@ -2696,6 +2715,63 @@
             return { mastered, total, percent };
         }
 
+        function calculateCapitalesBadgeProgress(zone) {
+            if (!currentPlayer || !playerData[currentPlayer] || !playerData[currentPlayer].stats) {
+                return { mastered: 0, total: 195, percent: 0 };
+            }
+
+            const stats = playerData[currentPlayer].stats;
+            const capitalesStats = stats['capitales'] || {};
+            const expertStats = stats['expert'] || {};
+
+            let mastered = 0;
+            let total = 0;
+
+            // Pays d'Amérique du Nord (23 pays)
+            const ameriqueNordISO = ['CA', 'US', 'MX', 'GT', 'BZ', 'SV', 'HN', 'NI', 'CR', 'PA', 'CU', 'JM', 'HT', 'DO', 'BS', 'BB', 'TT', 'GD', 'LC', 'VC', 'AG', 'DM', 'KN'];
+            
+            // Pays d'Amérique du Sud (12 pays)
+            const ameriqueSudISO = ['BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'BO', 'PY', 'UY', 'GY', 'SR'];
+
+            countriesData.forEach(country => {
+                let include = false;
+
+                if (zone === 'monde') {
+                    include = true;
+                } else if (zone === 'europe') {
+                    include = country.continent === 'Europe';
+                } else if (zone === 'asie') {
+                    include = country.continent === 'Asie';
+                } else if (zone === 'afrique') {
+                    include = country.continent === 'Afrique';
+                } else if (zone === 'amerique-nord') {
+                    include = ameriqueNordISO.includes(country.iso2);
+                } else if (zone === 'amerique-sud') {
+                    include = ameriqueSudISO.includes(country.iso2);
+                } else if (zone === 'oceanie') {
+                    include = country.continent === 'Océanie';
+                }
+
+                if (!include) return;
+
+                total++;
+
+                // Vérifier si le pays a un ruban argent OU or
+                // Ruban argent ou or = (Capitales + Expert) >= 6
+                const capitalesCount = capitalesStats[country.iso2] || 0;
+                const expertCount = expertStats[country.iso2] || 0;
+                const totalCapitalesCount = capitalesCount + expertCount;
+
+                if (totalCapitalesCount >= 6) {
+                    mastered++;
+                }
+            });
+
+            const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+
+            return { mastered, total, percent };
+        }
+
         function getBadgeStatus(percent) {
             if (percent >= 100) return 'complete';
             if (percent >= 75) return 'gold';
@@ -2717,34 +2793,64 @@
                 return;
             }
 
-            const container = document.getElementById('explorationBadges');
-            if (!container) return;
+            // Badges Exploration
+            const explorationContainer = document.getElementById('explorationBadges');
+            if (explorationContainer) {
+                let html = '';
 
-            let html = '';
+                explorationBadges.forEach(badge => {
+                    const progress = calculateBadgeProgress(badge.zone);
+                    const status = getBadgeStatus(progress.percent);
+                    const medal = getMedalEmoji(status);
 
-            explorationBadges.forEach(badge => {
-                const progress = calculateBadgeProgress(badge.zone);
-                const status = getBadgeStatus(progress.percent);
-                const medal = getMedalEmoji(status);
+                    html += `
+                        <div class="badge-card ${status}" onclick="openBadgeModal('${badge.id}', 'exploration')">
+                            <div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>
+                            <div class="badge-${status === 'locked' ? 'lock' : 'medal'}">${medal}</div>
+                            <div class="badge-name">${badge.name}</div>
+                            <div class="badge-progress">${progress.mastered}/${progress.total} (${progress.percent}%)</div>
+                        </div>
+                    `;
+                });
 
-                html += `
-                    <div class="badge-card ${status}" onclick="openBadgeModal('${badge.id}')">
-                        <div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>
-                        <div class="badge-${status === 'locked' ? 'lock' : 'medal'}">${medal}</div>
-                        <div class="badge-name">${badge.name}</div>
-                        <div class="badge-progress">${progress.mastered}/${progress.total} (${progress.percent}%)</div>
-                    </div>
-                `;
-            });
+                explorationContainer.innerHTML = html;
+            }
 
-            container.innerHTML = html;
+            // Badges Capitales
+            const capitalesContainer = document.getElementById('capitalesBadges');
+            if (capitalesContainer) {
+                let html = '';
+
+                capitalesBadges.forEach(badge => {
+                    const progress = calculateCapitalesBadgeProgress(badge.zone);
+                    const status = getBadgeStatus(progress.percent);
+                    const medal = getMedalEmoji(status);
+
+                    html += `
+                        <div class="badge-card ${status}" onclick="openBadgeModal('${badge.id}', 'capitales')">
+                            <div class="badge-card-image" style="background-image: url('./badges/${badge.id}.png')"></div>
+                            <div class="badge-${status === 'locked' ? 'lock' : 'medal'}">${medal}</div>
+                            <div class="badge-name">${badge.name}</div>
+                            <div class="badge-progress">${progress.mastered}/${progress.total} (${progress.percent}%)</div>
+                        </div>
+                    `;
+                });
+
+                capitalesContainer.innerHTML = html;
+            }
         }
 
-        function openBadgeModal(badgeId) {
-            const badge = explorationBadges.find(b => b.id === badgeId);
+        function openBadgeModal(badgeId, badgeType) {
+            const badge = badgeType === 'capitales' 
+                ? capitalesBadges.find(b => b.id === badgeId)
+                : explorationBadges.find(b => b.id === badgeId);
+            
             if (!badge) return;
 
-            const progress = calculateBadgeProgress(badge.zone);
+            const progress = badgeType === 'capitales'
+                ? calculateCapitalesBadgeProgress(badge.zone)
+                : calculateBadgeProgress(badge.zone);
+            
             const status = getBadgeStatus(progress.percent);
             const medal = getMedalEmoji(status);
 
@@ -2756,6 +2862,7 @@
             // Générer la grille des pays
             const stats = playerData[currentPlayer].stats;
             const nommePaysStats = stats['nomme-pays'] || {};
+            const capitalesStats = stats['capitales'] || {};
             const expertStats = stats['expert'] || {};
 
             // Pays d'Amérique du Nord (23 pays)
@@ -2787,10 +2894,22 @@
 
                 if (!include) return;
 
-                const nommePaysCount = nommePaysStats[country.iso2] || 0;
-                const expertCount = expertStats[country.iso2] || 0;
-                const totalPaysCount = nommePaysCount + expertCount;
-                const isMastered = totalPaysCount >= 6;
+                // Déterminer si le pays remplit la condition du badge
+                let isMastered = false;
+                
+                if (badgeType === 'capitales') {
+                    // Badge Capitales : ruban argent OU or = (Capitales + Expert) >= 6
+                    const capitalesCount = capitalesStats[country.iso2] || 0;
+                    const expertCount = expertStats[country.iso2] || 0;
+                    const totalCapitalesCount = capitalesCount + expertCount;
+                    isMastered = totalCapitalesCount >= 6;
+                } else {
+                    // Badge Exploration : cadre doré = (Nomme + Expert) >= 6
+                    const nommePaysCount = nommePaysStats[country.iso2] || 0;
+                    const expertCount = expertStats[country.iso2] || 0;
+                    const totalPaysCount = nommePaysCount + expertCount;
+                    isMastered = totalPaysCount >= 6;
+                }
 
                 gridHtml += `
                     <div class="country-card ${!isMastered ? 'not-discovered' : ''} ${isMastered ? 'mastered' : ''}" title="${country.nom}">
