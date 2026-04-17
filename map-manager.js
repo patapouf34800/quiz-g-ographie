@@ -163,8 +163,8 @@ class InteractiveMap {
               this.tooltip.textContent = countryName;
               this.tooltip.style.display = 'block';
               
-              // Assombrir légèrement la couleur pour bien voir les frontières
-              e.target.style.fill = '#2F855A'; // Vert plus foncé
+              // Couleur rouge pour bien voir les frontières
+              e.target.style.fill = '#E53E3E'; // Rouge vif
               e.target.style.strokeWidth = '1.5'; // Bordure plus épaisse
             } else {
               e.target.style.fill = '#D0D0D0';
