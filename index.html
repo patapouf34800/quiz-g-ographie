@@ -800,6 +800,24 @@
             transform: translateY(-2px);
         }
 
+        .btn-return-menu {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .btn-return-menu:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+
         .map-container {
             background: #f7f7f7;
             border-radius: 15px;
@@ -1698,6 +1716,49 @@
                 .trim();
         }
 
+        // 🔧 MODE DEV : Auto-complétion (sauf le premier pays)
+        function devAutoComplete() {
+            console.log('🔧 MODE DEV : Auto-complétion activée');
+            
+            // Trier les pays alphabétiquement
+            const sortedCountries = [...currentGameCountries].sort((a, b) => 
+                a.nom.localeCompare(b.nom, 'fr')
+            );
+            
+            // Ajouter tous les pays sauf le premier
+            sortedCountries.slice(1).forEach(country => {
+                if (!foundCountries.includes(country.iso2)) {
+                    foundCountries.push(country.iso2);
+                    
+                    // Colorer sur la carte
+                    if (currentMap) {
+                        currentMap.colorCountry(country.nom);
+                    }
+                    
+                    // Ajouter à la collection du joueur
+                    if (!playerData[currentPlayer].collection.includes(country.iso2)) {
+                        playerData[currentPlayer].collection.push(country.iso2);
+                    }
+                }
+            });
+            
+            // Sauvegarder
+            savePlayerData();
+            
+            // Mettre à jour l'affichage
+            updateFoundList();
+            updateGameStats();
+            
+            // Message
+            const feedback = document.getElementById('inputFeedback');
+            feedback.textContent = `🔧 DEV : ${foundCountries.length}/${currentGameCountries.length} pays ajoutés !`;
+            feedback.className = 'input-feedback show correct';
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+
         async function startGame() {
             if (!selectedZone) {
                 alert('⚠️ Choisis d\'abord une zone géographique !');
@@ -1797,6 +1858,13 @@
             const guess = input.value.trim();
 
             if (!guess) return;
+
+            // 🔧 MODE DEV : Touche "9" pour auto-compléter (sauf le premier pays)
+            if (guess === '9') {
+                devAutoComplete();
+                input.value = '';
+                return;
+            }
 
             const normalizedGuess = normalizeString(guess);
 
@@ -1974,22 +2042,21 @@
             saveCurrentProgress();
             
             // Message de victoire
-            const zoneNames = {
-                'monde': 'le Monde',
-                'europe': 'l\'Europe',
-                'asie': 'l\'Asie',
-                'afrique': 'l\'Afrique',
-                'amerique-nord': 'l\'Amérique du Nord',
-                'amerique-sud': 'l\'Amérique du Sud',
-                'oceanie': 'l\'Océanie'
-            };
+            const feedback = document.getElementById('inputFeedback');
+            feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
+            feedback.className = 'input-feedback show correct';
             
-            alert(`🎉 FÉLICITATIONS ! 🎉\n\nTu as trouvé tous les pays de ${zoneNames[selectedZone]} !\n\n✨ ${currentGameCountries.length} pays découverts ! ✨`);
+            // Masquer les boutons Abandonner et Quitter
+            document.getElementById('abandonGameBtn').style.display = 'none';
+            document.getElementById('quitGameBtn').style.display = 'none';
             
-            // Retour automatique au menu après 500ms
-            setTimeout(() => {
-                returnToMenu();
-            }, 500);
+            // Créer et afficher un bouton "Retour au menu"
+            const gameButtons = document.querySelector('.game-buttons');
+            const returnBtn = document.createElement('button');
+            returnBtn.className = 'btn-return-menu';
+            returnBtn.textContent = '← Retour au menu';
+            returnBtn.onclick = returnToMenu;
+            gameButtons.appendChild(returnBtn);
         }
 
         function quitGame() {
@@ -2182,6 +2249,13 @@
             
             if (quitBtn) {
                 quitBtn.textContent = '❌ Quitter';
+                quitBtn.style.display = 'inline-block';
+            }
+            
+            // Supprimer le bouton "Retour au menu" s'il existe
+            const returnBtn = document.querySelector('.btn-return-menu');
+            if (returnBtn) {
+                returnBtn.remove();
             }
         }
 
