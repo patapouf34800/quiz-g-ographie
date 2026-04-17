@@ -1658,6 +1658,9 @@
         // =====================================
 
         function loadPlayers() {
+            console.log('📂 Chargement des joueurs...');
+            console.log('playerData:', playerData);
+            
             const savedPlayersSection = document.getElementById('savedPlayersSection');
             const playerList = document.getElementById('playerList');
             
@@ -1667,6 +1670,7 @@
             }
             
             const players = Object.keys(playerData || {});
+            console.log('Joueurs trouvés:', players);
             
             if (players.length > 0) {
                 savedPlayersSection.style.display = 'block';
@@ -1744,6 +1748,8 @@
         }
 
         function selectPlayer(name) {
+            console.log('👤 Sélection du joueur:', name);
+            console.log('Données du joueur:', playerData[name]);
             currentPlayer = name;
             
             // Masquer l'écran de sélection
@@ -3101,6 +3107,11 @@
         }
 
         function saveCurrentProgress() {
+            console.log('💾 === SAUVEGARDE PROGRESSION ===');
+            console.log('Joueur actuel:', currentPlayer);
+            console.log('Mode actuel:', selectedMode);
+            console.log('Pays trouvés:', foundCountries);
+            
             // Initialiser la structure si elle n'existe pas (rétrocompatibilité)
             if (!playerData[currentPlayer].stats) {
                 playerData[currentPlayer].stats = {
@@ -3108,18 +3119,25 @@
                     'capitales': {},
                     'expert': {}
                 };
+                console.log('⚠️ Stats initialisées');
             }
             
             // Incrémenter le compteur pour chaque pays trouvé dans le mode actuel
             const modeStats = playerData[currentPlayer].stats[selectedMode];
+            console.log('Stats du mode avant:', JSON.stringify(modeStats));
+            
             foundCountries.forEach(iso2 => {
                 if (!modeStats[iso2]) {
                     modeStats[iso2] = 0;
                 }
                 modeStats[iso2]++;
+                console.log(`  ✅ ${iso2} : ${modeStats[iso2]}`);
             });
             
+            console.log('Stats du mode après:', JSON.stringify(modeStats));
+            console.log('Appel savePlayerData()...');
             savePlayerData();
+            console.log('💾 === FIN SAUVEGARDE ===');
         }
 
         function revealMissingCountries() {
