@@ -5103,17 +5103,9 @@
             const country = populationGameState.availableCountries.find(c => c.iso2 === iso2);
             if (!country) return;
             
-            const newPopulation = populationGameState.currentPopulation + country.habitants;
-            
-            // Vérifier si on dépasse
-            if (newPopulation > populationGameState.targetPopulation) {
-                endPopulationGame(true);
-                return;
-            }
-            
-            // Ajouter le pays
+            // Ajouter le pays AVANT de vérifier le dépassement
             populationGameState.selectedCountries.push(country);
-            populationGameState.currentPopulation = newPopulation;
+            populationGameState.currentPopulation += country.habitants;
             
             // Marquer le pays comme sélectionné dans l'interface
             const countryItem = document.querySelector(`.country-item[data-iso2="${iso2}"]`);
@@ -5124,6 +5116,12 @@
             // Mettre à jour l'affichage
             updatePopulationDisplay();
             renderSelectedCountries();
+            
+            // Vérifier si on dépasse APRÈS avoir ajouté le pays
+            if (populationGameState.currentPopulation > populationGameState.targetPopulation) {
+                endPopulationGame(true);
+                return;
+            }
         }
 
         function formatPopulation(pop) {
