@@ -157,11 +157,15 @@ class InteractiveMap {
           path.addEventListener('mouseenter', (e) => {
             const countryCode = e.target.id.toUpperCase();
             
-            // Si le pays est trouvé, afficher le tooltip
+            // Si le pays est trouvé, afficher le tooltip ET changer la couleur
             if (this.foundCountries.has(countryCode)) {
               const countryName = this.codeToName[countryCode] || countryCode;
               this.tooltip.textContent = countryName;
               this.tooltip.style.display = 'block';
+              
+              // Assombrir légèrement la couleur pour bien voir les frontières
+              e.target.style.fill = '#2F855A'; // Vert plus foncé
+              e.target.style.strokeWidth = '1.5'; // Bordure plus épaisse
             } else {
               e.target.style.fill = '#D0D0D0';
             }
@@ -183,6 +187,10 @@ class InteractiveMap {
             const countryCode = e.target.id.toUpperCase();
             if (!this.foundCountries.has(countryCode)) {
               e.target.style.fill = '#E8E8E8';
+            } else {
+              // Restaurer la couleur verte normale
+              e.target.style.fill = '#48BB78';
+              e.target.style.strokeWidth = '0.5';
             }
           });
         });
