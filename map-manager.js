@@ -69,6 +69,17 @@ class InteractiveMap {
     this.zone = zone;
     this.svgElement = null;
     this.foundCountries = new Set();
+    
+    // Créer le tooltip
+    this.tooltip = document.createElement('div');
+    this.tooltip.className = 'country-tooltip';
+    document.body.appendChild(this.tooltip);
+    
+    // Mapping inverse: code ISO -> nom
+    this.codeToName = {};
+    for (const [name, code] of Object.entries(COUNTRY_CODES)) {
+      this.codeToName[code] = name;
+    }
   }
 
   /**
@@ -144,12 +155,30 @@ class InteractiveMap {
           
           // Effet hover
           path.addEventListener('mouseenter', (e) => {
-            if (!this.foundCountries.has(e.target.id)) {
+            const countryCode = e.target.id;
+            
+            // Si le pays est trouvé, afficher le tooltip
+            if (this.foundCountries.has(countryCode)) {
+              const countryName = this.codeToName[countryCode] || countryCode;
+              this.tooltip.textContent = countryName;
+              this.tooltip.style.display = 'block';
+            } else {
               e.target.style.fill = '#D0D0D0';
             }
           });
           
+          path.addEventListener('mousemove', (e) => {
+            // Positionner le tooltip près du curseur
+            if (this.foundCountries.has(e.target.id)) {
+              this.tooltip.style.left = (e.pageX + 15) + 'px';
+              this.tooltip.style.top = (e.pageY - 10) + 'px';
+            }
+          });
+          
           path.addEventListener('mouseleave', (e) => {
+            // Masquer le tooltip
+            this.tooltip.style.display = 'none';
+            
             if (!this.foundCountries.has(e.target.id)) {
               e.target.style.fill = '#E8E8E8';
             }
