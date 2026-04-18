@@ -5733,8 +5733,11 @@
             const scoreDistance = 1000 * (populationPourScore / objectif);
             
             // 2. Multiplicateur de Risque
-            // Ne compter que les pays qui représentent au moins 0.5% de l'objectif
-            const seuilSignificatif = objectif * 0.005;
+            // Ne compter que les pays qui représentent au moins 0.5% de l'objectif (minimum 3M)
+            const seuilSignificatif = Math.max(
+                objectif * 0.005,  // 0.5% de l'objectif
+                3_000_000          // Minimum 3M d'habitants
+            );
             console.log('Seuil significatif:', (seuilSignificatif/1000000).toFixed(2), 'M');
             
             const paysAEvaluer = populationGameState.selectedCountries.slice(0, paysACompter);
