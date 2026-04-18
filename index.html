@@ -2038,7 +2038,7 @@
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             border-radius: 20px;
             padding: 0;
-            max-width: 500px;
+            max-width: 700px;
             width: 90%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: slideUp 0.4s ease;
@@ -2046,7 +2046,7 @@
         }
 
         .score-modal-header {
-            padding: 30px;
+            padding: 20px 25px;
             text-align: center;
             background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
             color: white;
@@ -2065,39 +2065,54 @@
         }
 
         .score-modal-icon {
-            font-size: 4em;
-            margin-bottom: 10px;
+            font-size: 2.5em;
+            margin-bottom: 5px;
             animation: bounce 0.6s ease;
         }
 
         .score-modal-title {
-            font-size: 1.8em;
+            font-size: 1.4em;
             font-weight: bold;
             margin: 0;
         }
 
         .score-modal-subtitle {
-            font-size: 1em;
+            font-size: 0.9em;
             opacity: 0.9;
-            margin-top: 5px;
+            margin-top: 3px;
         }
 
         .score-modal-body {
-            padding: 30px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .score-left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .score-right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .score-result-section {
             background: #f8f9fa;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 12px;
+            margin-bottom: 0;
         }
 
         .score-result-title {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #666;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -2105,7 +2120,7 @@
         .score-stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 5px 0;
             border-bottom: 1px solid #e0e0e0;
         }
 
@@ -2127,26 +2142,26 @@
         .score-breakdown {
             background: white;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 12px;
+            margin-bottom: 0;
             border: 2px solid #e0e0e0;
         }
 
         .score-breakdown-title {
-            font-size: 1.1em;
+            font-size: 0.9em;
             color: #00838F;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
 
         .score-breakdown-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 6px 10px;
             background: #f8f9fa;
             border-radius: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             border-left: 3px solid #00ACC1;
         }
 
@@ -2177,34 +2192,34 @@
         .score-final {
             background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
             color: white;
-            padding: 15px;
+            padding: 10px;
             border-radius: 12px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 0;
         }
 
         .score-final-label {
-            font-size: 0.85em;
+            font-size: 0.8em;
             opacity: 0.9;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .score-final-value {
-            font-size: 2em;
+            font-size: 1.8em;
             font-weight: bold;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .score-modal-footer {
-            padding: 0 30px 30px 30px;
+            padding: 0 20px 20px 20px;
         }
 
         .score-modal-btn {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             border: none;
             border-radius: 10px;
-            font-size: 1em;
+            font-size: 0.95em;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
@@ -2249,56 +2264,62 @@
                 <div class="score-modal-subtitle" id="scoreModalSubtitle">Tu t'es arrêté à temps !</div>
             </div>
             <div class="score-modal-body">
-                <!-- Résultats -->
-                <div class="score-result-section">
-                    <div class="score-result-title">📊 Résultat</div>
-                    <div class="score-stat-row">
-                        <span class="score-stat-label">Population finale</span>
-                        <span class="score-stat-value" id="scorePopulation">0M</span>
-                    </div>
-                    <div class="score-stat-row">
-                        <span class="score-stat-label">Objectif</span>
-                        <span class="score-stat-value" id="scoreObjectif">0M</span>
-                    </div>
-                    <div class="score-stat-row">
-                        <span class="score-stat-label">Pays trouvés</span>
-                        <span class="score-stat-value" id="scorePays">0</span>
-                    </div>
-                    <div class="score-stat-row">
-                        <span class="score-stat-label">Pays significatifs</span>
-                        <span class="score-stat-value" id="scorePaysSignif">0</span>
-                    </div>
-                    <div class="score-stat-row" id="scoreDepassementRow" style="display: none;">
-                        <span class="score-stat-label">⚠️ Dépassement</span>
-                        <span class="score-stat-value" id="scoreDepassement" style="color: #F59E0B;">0%</span>
-                    </div>
-                </div>
-
-                <!-- Détail du score -->
-                <div class="score-breakdown">
-                    <div class="score-breakdown-title">🎯 Détail du Score</div>
-                    <div class="score-breakdown-item">
-                        <span class="score-breakdown-label">Distance</span>
-                        <span class="score-breakdown-value" id="scoreDistance">0 pts</span>
-                    </div>
-                    <div class="score-breakdown-item">
-                        <span class="score-breakdown-label">Risque</span>
-                        <span class="score-breakdown-value" id="scoreRisque">×0</span>
-                    </div>
-                    <div class="score-breakdown-item">
-                        <span class="score-breakdown-label">Efficacité</span>
-                        <span class="score-breakdown-value" id="scoreEfficacite">+0%</span>
-                    </div>
-                    <div class="score-breakdown-item penalty">
-                        <span class="score-breakdown-label">Pénalité</span>
-                        <span class="score-breakdown-value" id="scorePenalite">×1</span>
+                <!-- Colonne gauche -->
+                <div class="score-left-column">
+                    <!-- Résultats -->
+                    <div class="score-result-section">
+                        <div class="score-result-title">📊 Résultat</div>
+                        <div class="score-stat-row">
+                            <span class="score-stat-label">Population finale</span>
+                            <span class="score-stat-value" id="scorePopulation">0M</span>
+                        </div>
+                        <div class="score-stat-row">
+                            <span class="score-stat-label">Objectif</span>
+                            <span class="score-stat-value" id="scoreObjectif">0M</span>
+                        </div>
+                        <div class="score-stat-row">
+                            <span class="score-stat-label">Pays trouvés</span>
+                            <span class="score-stat-value" id="scorePays">0</span>
+                        </div>
+                        <div class="score-stat-row">
+                            <span class="score-stat-label">Pays significatifs</span>
+                            <span class="score-stat-value" id="scorePaysSignif">0</span>
+                        </div>
+                        <div class="score-stat-row" id="scoreDepassementRow" style="display: none;">
+                            <span class="score-stat-label">⚠️ Dépassement</span>
+                            <span class="score-stat-value" id="scoreDepassement" style="color: #F59E0B;">0%</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Score final -->
-                <div class="score-final">
-                    <div class="score-final-label">Score Final</div>
-                    <div class="score-final-value" id="scoreFinalValue">0</div>
+                <!-- Colonne droite -->
+                <div class="score-right-column">
+                    <!-- Détail du score -->
+                    <div class="score-breakdown">
+                        <div class="score-breakdown-title">🎯 Détail du Score</div>
+                        <div class="score-breakdown-item">
+                            <span class="score-breakdown-label">Distance</span>
+                            <span class="score-breakdown-value" id="scoreDistance">0 pts</span>
+                        </div>
+                        <div class="score-breakdown-item">
+                            <span class="score-breakdown-label">Risque</span>
+                            <span class="score-breakdown-value" id="scoreRisque">×0</span>
+                        </div>
+                        <div class="score-breakdown-item">
+                            <span class="score-breakdown-label">Efficacité</span>
+                            <span class="score-breakdown-value" id="scoreEfficacite">+0%</span>
+                        </div>
+                        <div class="score-breakdown-item penalty">
+                            <span class="score-breakdown-label">Pénalité</span>
+                            <span class="score-breakdown-value" id="scorePenalite">×1</span>
+                        </div>
+                    </div>
+
+                    <!-- Score final -->
+                    <div class="score-final">
+                        <div class="score-final-label">Score Final</div>
+                        <div class="score-final-value" id="scoreFinalValue">0</div>
+                    </div>
                 </div>
             </div>
             <div class="score-modal-footer">
