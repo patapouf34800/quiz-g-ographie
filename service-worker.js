@@ -1,5 +1,5 @@
 // Service Worker pour Géo Quiz - Mode hors ligne
-const CACHE_NAME = 'geo-quiz-v1.0.3';
+const CACHE_NAME = 'geo-quiz-v1.0.4';
 
 // Liste des fichiers essentiels (chargés lors de l'installation)
 const ESSENTIAL_FILES = [
@@ -39,15 +39,15 @@ self.addEventListener('install', (event) => {
                 
                 // Mettre en cache les SVG des cartes
                 console.log('[Service Worker] Mise en cache des cartes SVG...');
-                await Promise.all(
-                    MAP_SVGS.map(url => 
-                        cache.add(url).catch(err => {
-                            console.warn(`[Service Worker] ⚠️ Impossible de cacher ${url}:`, err);
-                            return null;
-                        })
-                    )
-                );
-                console.log('[Service Worker] ✅ Cartes SVG en cache');
+                for (const svgUrl of MAP_SVGS) {
+                    try {
+                        await cache.add(svgUrl);
+                        console.log(`[Service Worker] ✅ ${svgUrl}`);
+                    } catch (err) {
+                        console.error(`[Service Worker] ❌ Erreur ${svgUrl}:`, err);
+                    }
+                }
+                console.log('[Service Worker] ✅ Cartes SVG terminées');
                 
                 // Charger le JSON pour connaître tous les pays
                 try {
@@ -84,15 +84,14 @@ self.addEventListener('install', (event) => {
                     const badgeUrls = badgeIds.map(id => `./badges/${id}.png`);
                     
                     console.log('[Service Worker] Mise en cache des badges...');
-                    await Promise.all(
-                        badgeUrls.map(url => 
-                            cache.add(url).catch(err => {
-                                console.warn(`[Service Worker] ⚠️ Impossible de cacher ${url}:`, err);
-                                return null;
-                            })
-                        )
-                    );
-                    console.log('[Service Worker] ✅ Badges en cache');
+                    for (const badgeUrl of badgeUrls) {
+                        try {
+                            await cache.add(badgeUrl);
+                        } catch (err) {
+                            console.warn(`[Service Worker] ⚠️ Badge ${badgeUrl}:`, err);
+                        }
+                    }
+                    console.log('[Service Worker] ✅ Badges terminés');
                     
                     console.log('[Service Worker] 🎉 Tous les fichiers sont en cache !');
                     console.log('[Service Worker] ✈️ L\'application fonctionne maintenant hors ligne');
