@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Mode Hors Ligne - Géo Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #00838F, #00ACC1);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #00838F;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+        .error {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+        .warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        .info {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        button {
+            background: linear-gradient(135deg, #00ACC1, #00838F);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,172,193,0.4);
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+        }
+        .progress {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #00ACC1, #26C6DA);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Mode Hors Ligne</h1>
+        
+        <div id="swStatus" class="status info">
+            Vérification en cours...
+        </div>
+        
+        <div id="cacheStatus" class="status info">
+            Analyse du cache...
+        </div>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar" style="width: 0%">0%</div>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="checkStatus()">🔄 Vérifier l'état</button>
+            <button onclick="viewCache()">📦 Voir le cache</button>
+            <button onclick="clearCache()">🗑️ Tout effacer</button>
+            <button onclick="window.location.href='index.html'">🎮 Retour au jeu</button>
+        </div>
+        
+        <div class="log" id="logContainer"></div>
+    </div>
+
+    <script>
+        let logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.push({ time: timestamp, message, type });
+            updateLog();
+        }
+        
+        function updateLog() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = logs.map(entry => {
+                const color = {
+                    'info': '#0EA5E9',
+                    'success': '#10B981',
+                    'error': '#EF4444',
+                    'warning': '#F59E0B'
+                }[entry.type] || '#666';
+                return `<div class="log-entry" style="color: ${color}">[${entry.time}] ${entry.message}</div>`;
+            }).reverse().join('');
+        }
+        
+        async function checkStatus() {
+            logs = [];
+            log('🔍 Début du diagnostic...');
+            
+            // Vérifier le Service Worker
+            if ('serviceWorker' in navigator) {
+                log('✅ Service Worker supporté', 'success');
+                
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length > 0) {
+                    log(`✅ ${registrations.length} Service Worker(s) enregistré(s)`, 'success');
+                    
+                    registrations.forEach((reg, i) => {
+                        if (reg.active) {
+                            log(`✅ SW ${i+1}: Actif (${reg.active.scriptURL})`, 'success');
+                            document.getElementById('swStatus').className = 'status success';
+                            document.getElementById('swStatus').textContent = '✅ Service Worker actif';
+                        } else if (reg.installing) {
+                            log(`⏳ SW ${i+1}: En cours d'installation...`, 'warning');
+                            document.getElementById('swStatus').className = 'status warning';
+                            document.getElementById('swStatus').textContent = '⏳ Service Worker en cours d\'installation...';
+                        }
+                    });
+                } else {
+                    log('❌ Aucun Service Worker enregistré', 'error');
+                    document.getElementById('swStatus').className = 'status error';
+                    document.getElementById('swStatus').textContent = '❌ Service Worker non enregistré';
+                }
+            } else {
+                log('❌ Service Worker non supporté par ce navigateur', 'error');
+                document.getElementById('swStatus').className = 'status error';
+                document.getElementById('swStatus').textContent = '❌ Service Worker non supporté';
+            }
+            
+            // Vérifier le cache
+            const cacheNames = await caches.keys();
+            log(`📦 ${cacheNames.length} cache(s) trouvé(s): ${cacheNames.join(', ')}`);
+            
+            if (cacheNames.length > 0) {
+                let totalFiles = 0;
+                let totalSize = 0;
+                
+                for (const cacheName of cacheNames) {
+                    const cache = await caches.open(cacheName);
+                    const requests = await cache.keys();
+                    totalFiles += requests.length;
+                    
+                    log(`📂 Cache "${cacheName}": ${requests.length} fichiers`);
+                    
+                    // Vérifier les fichiers essentiels
+                    const essentials = [
+                        'index.html',
+                        'manifest.json', 
+                        'countries_fr_complet.json',
+                        'icon-192.png',
+                        'icon-512.png'
+                    ];
+                    
+                    for (const file of essentials) {
+                        const match = await cache.match(`./${file}`);
+                        if (match) {
+                            log(`  ✅ ${file}`, 'success');
+                        } else {
+                            log(`  ❌ ${file} MANQUANT`, 'error');
+                        }
+                    }
+                    
+                    // Compter drapeaux, badges et SVG
+                    const flags = requests.filter(r => r.url.includes('/flags/')).length;
+                    const badges = requests.filter(r => r.url.includes('/badges/')).length;
+                    const maps = requests.filter(r => r.url.includes('/maps/') || r.url.includes('.svg')).length;
+                    
+                    log(`  🏴 ${flags} drapeaux en cache`);
+                    log(`  🏅 ${badges} badges en cache`);
+                    log(`  🗺️ ${maps} cartes SVG en cache`);
+                    
+                    if (flags < 195) {
+                        log(`  ⚠️ Il manque ${195 - flags} drapeaux !`, 'warning');
+                    }
+                    if (badges < 18) {
+                        log(`  ⚠️ Il manque ${18 - badges} badges !`, 'warning');
+                    }
+                    if (maps < 9) {
+                        log(`  ⚠️ Il manque ${9 - maps} cartes SVG !`, 'warning');
+                    }
+                }
+                
+                // Mise à jour du statut
+                const expectedFiles = 6 + 9 + 195 + 18; // essentials + maps + flags + badges
+                const percentage = Math.round((totalFiles / expectedFiles) * 100);
+                
+                document.getElementById('progressBar').style.width = percentage + '%';
+                document.getElementById('progressBar').textContent = percentage + '%';
+                
+                if (totalFiles >= expectedFiles) {
+                    document.getElementById('cacheStatus').className = 'status success';
+                    document.getElementById('cacheStatus').textContent = `✅ ${totalFiles} fichiers en cache - Mode hors ligne prêt !`;
+                    log('🎉 TOUT EST EN CACHE ! Tu peux jouer hors ligne !', 'success');
+                } else {
+                    document.getElementById('cacheStatus').className = 'status warning';
+                    document.getElementById('cacheStatus').textContent = `⏳ ${totalFiles}/${expectedFiles} fichiers en cache (${percentage}%)`;
+                    log(`⏳ Cache incomplet: ${totalFiles}/${expectedFiles} fichiers`, 'warning');
+                    log('💡 Attends quelques secondes et re-vérifie', 'info');
+                }
+                
+                // Estimation taille
+                if (navigator.storage && navigator.storage.estimate) {
+                    const estimate = await navigator.storage.estimate();
+                    const usageMB = (estimate.usage / 1024 / 1024).toFixed(2);
+                    const quotaMB = (estimate.quota / 1024 / 1024).toFixed(2);
+                    log(`💾 Stockage: ${usageMB} MB utilisés sur ${quotaMB} MB disponibles`);
+                }
+            } else {
+                document.getElementById('cacheStatus').className = 'status error';
+                document.getElementById('cacheStatus').textContent = '❌ Aucun cache trouvé';
+                log('❌ Aucun fichier en cache', 'error');
+                log('💡 Ouvre index.html d\'abord pour que le SW se lance', 'info');
+            }
+            
+            // État réseau
+            if (navigator.onLine) {
+                log('🌐 État réseau: EN LIGNE', 'success');
+            } else {
+                log('📡 État réseau: HORS LIGNE', 'warning');
+            }
+            
+            log('✅ Diagnostic terminé');
+        }
+        
+        async function viewCache() {
+            log('📦 Listage des fichiers en cache...');
+            const cacheNames = await caches.keys();
+            
+            for (const cacheName of cacheNames) {
+                const cache = await caches.open(cacheName);
+                const requests = await cache.keys();
+                
+                log(`\n=== Cache: ${cacheName} (${requests.length} fichiers) ===`);
+                
+                requests.forEach(request => {
+                    const url = new URL(request.url);
+                    log(`  • ${url.pathname}`, 'info');
+                });
+            }
+        }
+        
+        async function clearCache() {
+            if (!confirm('⚠️ Supprimer TOUT le cache ?\n\nCela va désactiver le mode hors ligne jusqu\'au prochain chargement.')) {
+                return;
+            }
+            
+            log('🗑️ Suppression du cache...');
+            
+            // Supprimer les caches
+            const cacheNames = await caches.keys();
+            for (const name of cacheNames) {
+                await caches.delete(name);
+                log(`✅ Cache "${name}" supprimé`, 'success');
+            }
+            
+            // Désinscrire les Service Workers
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                await registration.unregister();
+                log('✅ Service Worker désinscrit', 'success');
+            }
+            
+            log('✅ Tout nettoyé ! Recharge la page pour recommencer.', 'success');
+            
+            document.getElementById('swStatus').className = 'status warning';
+            document.getElementById('swStatus').textContent = '⚠️ Cache vidé - rechargez la page';
+            document.getElementById('cacheStatus').className = 'status warning';
+            document.getElementById('cacheStatus').textContent = '⚠️ Cache vidé - rechargez la page';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressBar').textContent = '0%';
+        }
+        
+        // Lancer le diagnostic au chargement
+        window.addEventListener('load', checkStatus);
+        
+        // Rafraîchir toutes les 5 secondes si cache incomplet
+        setInterval(async () => {
+            const cacheNames = await caches.keys();
+            if (cacheNames.length > 0) {
+                const cache = await caches.open(cacheNames[0]);
+                const requests = await cache.keys();
+                const expectedFiles = 5 + 195 + 18;
+                
+                if (requests.length < expectedFiles) {
+                    log('🔄 Mise à jour automatique...', 'info');
+                    checkStatus();
+                }
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
