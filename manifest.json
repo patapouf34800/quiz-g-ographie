@@ -1,12 +1,13 @@
 {
   "name": "Géo Quiz - Découvre les pays du monde",
   "short_name": "Géo Quiz",
-  "description": "Jeu éducatif pour apprendre la géographie mondiale",
+  "description": "Jeu éducatif pour apprendre la géographie mondiale - 195 pays à découvrir !",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#00838F",
+  "background_color": "#00ACC1",
   "theme_color": "#00ACC1",
   "orientation": "any",
+  "scope": "./",
   "icons": [
     {
       "src": "./icon-192.png",
@@ -21,6 +22,24 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["education", "games"],
-  "lang": "fr"
+  "categories": [
+    "education",
+    "games"
+  ],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "./screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "./screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }

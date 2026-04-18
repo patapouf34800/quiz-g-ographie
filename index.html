@@ -6410,9 +6410,7 @@
             initContinentTabs(); // Initialiser les onglets de filtrage par continent
             loadCountriesData(); // Charger les données des pays
             
-            // Service Worker désactivé en développement
-            // Décommenter pour activer le mode hors ligne :
-            /*
+            // Service Worker pour le mode hors ligne
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./service-worker.js')
                     .then((registration) => {
@@ -6422,7 +6420,6 @@
                         console.log('❌ Erreur Service Worker:', error);
                     });
             }
-            */
         });
     </script>
 </body>
