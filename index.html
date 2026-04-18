@@ -1067,6 +1067,9 @@
             border-radius: 12px;
             padding: 15px;
             border: 2px solid rgba(255, 255, 255, 0.3);
+            max-width: 550px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .rules-header {
@@ -2598,17 +2601,19 @@
                         Pays restants : <strong id="remainingCountries">10</strong>
                     </span>
                 </div>
-                
-                <!-- Règles du jeu -->
-                <div class="game-rules" id="gameRules">
-                    <div class="rules-header">📋 Règles</div>
-                    <div class="rules-content">
-                        <span class="rule-item">🎯 Objectif : Approche l'objectif SANS le dépasser</span>
-                        <span class="rule-item" id="ruleLimit">⚠️ Limite : 10 pays maximum</span>
-                        <span class="rule-item" id="ruleContinents" style="display: none;">🌍 Mode enfer : Représente les 6 continents</span>
-                    </div>
+            </div>
+            
+            <!-- Règles du jeu (centrées) -->
+            <div class="game-rules" id="gameRules">
+                <div class="rules-header">📋 Règles</div>
+                <div class="rules-content">
+                    <span class="rule-item">🎯 Objectif : Approche l'objectif SANS le dépasser</span>
+                    <span class="rule-item" id="ruleLimit">⚠️ Limite : 10 pays maximum</span>
+                    <span class="rule-item" id="ruleContinents" style="display: none;">🌍 Mode enfer : Représente les 6 continents</span>
                 </div>
-                
+            </div>
+            
+            <div class="game-info">
                 <!-- Indicateur des continents (mode enfer uniquement) -->
                 <div id="continentsIndicator" style="display: none; margin-top: 10px; font-size: 0.9em;">
                     <span style="opacity: 0.8;">Continents :</span>
@@ -2620,6 +2625,7 @@
                     <span id="continent-oceanie" class="continent-badge">🏝️ Océanie</span>
                 </div>
             </div>
+            
             <div class="game-buttons">
                 <button class="btn-quit" id="quitPopulationGameBtn">❌ Quitter</button>
             </div>
