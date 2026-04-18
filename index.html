@@ -2013,9 +2013,291 @@
                 font-size: 2em;
             }
         }
+
+        /* Modal de score personnalisé */
+        .score-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .score-modal-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .score-modal {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            padding: 0;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            overflow: hidden;
+        }
+
+        .score-modal-header {
+            padding: 30px;
+            text-align: center;
+            background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
+            color: white;
+        }
+
+        .score-modal-header.success {
+            background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+        }
+
+        .score-modal-header.exceeded {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        }
+
+        .score-modal-header.failure {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+        }
+
+        .score-modal-icon {
+            font-size: 4em;
+            margin-bottom: 10px;
+            animation: bounce 0.6s ease;
+        }
+
+        .score-modal-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .score-modal-subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .score-modal-body {
+            padding: 30px;
+        }
+
+        .score-result-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .score-result-title {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .score-stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .score-stat-label {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .score-stat-value {
+            font-weight: bold;
+            color: #00838F;
+            font-size: 0.95em;
+        }
+
+        .score-breakdown {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .score-breakdown-title {
+            font-size: 1.1em;
+            color: #00838F;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score-breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #00ACC1;
+        }
+
+        .score-breakdown-item.penalty {
+            border-left-color: #F59E0B;
+        }
+
+        .score-breakdown-label {
+            color: #444;
+            font-size: 0.95em;
+        }
+
+        .score-breakdown-value {
+            font-weight: bold;
+            color: #00838F;
+            font-size: 1em;
+        }
+
+        .score-final {
+            background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-final-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .score-final-value {
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-modal-footer {
+            padding: 0 30px 30px 30px;
+        }
+
+        .score-modal-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: linear-gradient(135deg, #00ACC1 0%, #00838F 100%);
+            color: white;
+        }
+
+        .score-modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 172, 193, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
     </style>
 </head>
 <body>
+    <!-- Modal de score personnalisé -->
+    <div class="score-modal-overlay" id="scoreModal">
+        <div class="score-modal">
+            <div class="score-modal-header" id="scoreModalHeader">
+                <div class="score-modal-icon" id="scoreModalIcon">🎉</div>
+                <h2 class="score-modal-title" id="scoreModalTitle">BRAVO !</h2>
+                <div class="score-modal-subtitle" id="scoreModalSubtitle">Tu t'es arrêté à temps !</div>
+            </div>
+            <div class="score-modal-body">
+                <!-- Résultats -->
+                <div class="score-result-section">
+                    <div class="score-result-title">📊 Résultat</div>
+                    <div class="score-stat-row">
+                        <span class="score-stat-label">Population finale</span>
+                        <span class="score-stat-value" id="scorePopulation">0M</span>
+                    </div>
+                    <div class="score-stat-row">
+                        <span class="score-stat-label">Objectif</span>
+                        <span class="score-stat-value" id="scoreObjectif">0M</span>
+                    </div>
+                    <div class="score-stat-row">
+                        <span class="score-stat-label">Pays trouvés</span>
+                        <span class="score-stat-value" id="scorePays">0</span>
+                    </div>
+                    <div class="score-stat-row">
+                        <span class="score-stat-label">Pays significatifs</span>
+                        <span class="score-stat-value" id="scorePaysSignif">0</span>
+                    </div>
+                    <div class="score-stat-row" id="scoreDepassementRow" style="display: none;">
+                        <span class="score-stat-label">⚠️ Dépassement</span>
+                        <span class="score-stat-value" id="scoreDepassement" style="color: #F59E0B;">0%</span>
+                    </div>
+                </div>
+
+                <!-- Détail du score -->
+                <div class="score-breakdown">
+                    <div class="score-breakdown-title">🎯 Détail du Score</div>
+                    <div class="score-breakdown-item">
+                        <span class="score-breakdown-label">Distance</span>
+                        <span class="score-breakdown-value" id="scoreDistance">0 pts</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span class="score-breakdown-label">Risque</span>
+                        <span class="score-breakdown-value" id="scoreRisque">×0</span>
+                    </div>
+                    <div class="score-breakdown-item">
+                        <span class="score-breakdown-label">Efficacité</span>
+                        <span class="score-breakdown-value" id="scoreEfficacite">+0%</span>
+                    </div>
+                    <div class="score-breakdown-item penalty">
+                        <span class="score-breakdown-label">Pénalité</span>
+                        <span class="score-breakdown-value" id="scorePenalite">×1</span>
+                    </div>
+                </div>
+
+                <!-- Score final -->
+                <div class="score-final">
+                    <div class="score-final-label">Score Final</div>
+                    <div class="score-final-value" id="scoreFinalValue">0</div>
+                </div>
+            </div>
+            <div class="score-modal-footer">
+                <button class="score-modal-btn" id="scoreModalBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>🌍 Géo Quiz</h1>
         <p class="subtitle">Découvre les pays du monde entier !</p>
@@ -5809,28 +6091,90 @@
             };
         }
 
+        // Fonction pour afficher le modal de score personnalisé
+        function showScoreModal(data) {
+            const modal = document.getElementById('scoreModal');
+            const header = document.getElementById('scoreModalHeader');
+            const icon = document.getElementById('scoreModalIcon');
+            const title = document.getElementById('scoreModalTitle');
+            const subtitle = document.getElementById('scoreModalSubtitle');
+            
+            // Configurer le header selon le type
+            header.className = 'score-modal-header';
+            if (data.type === 'success') {
+                header.classList.add('success');
+                icon.textContent = '🎉';
+                title.textContent = 'BRAVO !';
+                subtitle.textContent = "Tu t'es arrêté à temps !";
+            } else if (data.type === 'exceeded') {
+                header.classList.add('exceeded');
+                icon.textContent = '💥';
+                title.textContent = 'DÉPASSEMENT !';
+                subtitle.textContent = `Tu as dépassé la limite de ${data.objectif}M d'habitants`;
+            } else if (data.type === 'failure') {
+                header.classList.add('failure');
+                icon.textContent = '🌍';
+                title.textContent = 'CONTRAINTE NON RESPECTÉE !';
+                subtitle.textContent = data.reason || 'Continents manquants';
+            }
+            
+            // Remplir les stats
+            document.getElementById('scorePopulation').textContent = data.population + 'M';
+            document.getElementById('scoreObjectif').textContent = data.objectif + 'M';
+            document.getElementById('scorePays').textContent = data.pays;
+            document.getElementById('scorePaysSignif').textContent = data.paysSignif;
+            
+            // Dépassement
+            const depassementRow = document.getElementById('scoreDepassementRow');
+            if (data.depassement && data.depassement !== '0.0%') {
+                depassementRow.style.display = 'flex';
+                document.getElementById('scoreDepassement').textContent = data.depassement;
+            } else {
+                depassementRow.style.display = 'none';
+            }
+            
+            // Détail du score
+            document.getElementById('scoreDistance').textContent = data.scoreDistance + ' pts';
+            document.getElementById('scoreRisque').textContent = '×' + data.risque;
+            document.getElementById('scoreEfficacite').textContent = '+' + data.efficacite;
+            document.getElementById('scorePenalite').textContent = '×' + data.penalite;
+            
+            // Score final
+            document.getElementById('scoreFinalValue').textContent = data.scoreFinal;
+            
+            // Afficher le modal
+            modal.classList.add('active');
+            
+            // Bouton OK
+            document.getElementById('scoreModalBtn').onclick = () => {
+                modal.classList.remove('active');
+                if (data.onClose) data.onClose();
+            };
+        }
+
         function endPopulationGame(exceeded) {
             // Vérifier la contrainte géographique en mode enfer (toujours, même si dépassement)
             if (populationGameState.difficulty === 'enfer') {
                 const geoCheck = checkGeographicConstraint();
                 if (!geoCheck.valid) {
-                    const raison = exceeded ? 'Tu as dépassé ET' : 'Tu n\'as pas respecté la contrainte :';
-                    alert(`🌍 CONTRAINTE GÉOGRAPHIQUE NON RESPECTÉE !
-
-${raison} tu dois avoir au moins un pays de chaque continent :
-- Europe
-- Asie
-- Afrique
-- Amérique du Nord
-- Amérique du Sud
-- Océanie
-
-Continents manquants : ${geoCheck.missingContinents.join(', ')}
-
-❌ Score : 0 points`);
-                    // Sauvegarder le score de 0
-                    savePopulationScore(0, 'enfer');
-                    quitPopulationGame();
+                    // Modal pour contrainte géographique non respectée
+                    showScoreModal({
+                        type: 'failure',
+                        reason: `Continents manquants : ${geoCheck.missingContinents.join(', ')}`,
+                        population: (populationGameState.currentPopulation / 1000000).toFixed(1),
+                        objectif: (populationGameState.targetPopulation / 1000000).toFixed(1),
+                        pays: populationGameState.selectedCountries.length,
+                        paysSignif: 0,
+                        scoreDistance: 0,
+                        risque: '0.00',
+                        efficacite: '0%',
+                        penalite: '0.00',
+                        scoreFinal: 0,
+                        onClose: () => {
+                            savePopulationScore(0, 'enfer');
+                            quitPopulationGame();
+                        }
+                    });
                     return;
                 }
             }
@@ -5840,44 +6184,26 @@ Continents manquants : ${geoCheck.missingContinents.join(', ')}
             const objectifMil = (populationGameState.targetPopulation / 1000000).toFixed(1);
             const nombrePays = exceeded ? populationGameState.selectedCountries.length - 1 : populationGameState.selectedCountries.length;
             
-            if (exceeded) {
-                alert(`💥 DÉPASSEMENT !
-
-Tu as dépassé la limite de ${objectifMil} millions d'habitants.
-⚠️ Dépassement : ${score.depassementPourcentage}
-
-📊 RÉSULTAT :
-Population finale : ${populationMil}M
-Pays trouvés : ${nombrePays}
-Pays significatifs : ${score.paysSignificatifs}
-
-🎯 SCORE : ${score.scoreFinal} points
-   ├─ Distance : ${score.scoreDistance} pts
-   ├─ Risque : ×${score.multiplicateurRisque}
-   ├─ Efficacité : +${score.bonusEfficacite}
-   └─ Pénalité : ×${score.penalite.toFixed(2)} (dépassement de ${score.depassementPourcentage})`);
-            } else {
-                alert(`🎉 BRAVO !
-
-Tu t'es arrêté à temps !
-
-📊 RÉSULTAT :
-Population finale : ${populationMil}M / ${objectifMil}M
-Pays trouvés : ${nombrePays}
-Pays significatifs : ${score.paysSignificatifs}
-
-🎯 SCORE : ${score.scoreFinal} points
-   ├─ Distance : ${score.scoreDistance} pts
-   ├─ Risque : ×${score.multiplicateurRisque}
-   ├─ Efficacité : +${score.bonusEfficacite}
-   └─ Pénalité : ×${score.penalite}`);
-            }
-            
-            // Sauvegarder le score
-            savePopulationScore(score.scoreFinal, score.difficulty);
-            
-            quitPopulationGame();
+            // Afficher le modal avec les résultats
+            showScoreModal({
+                type: exceeded ? 'exceeded' : 'success',
+                population: populationMil,
+                objectif: objectifMil,
+                pays: nombrePays,
+                paysSignif: score.paysSignificatifs,
+                depassement: exceeded ? score.depassementPourcentage : '0.0%',
+                scoreDistance: score.scoreDistance,
+                risque: score.multiplicateurRisque,
+                efficacite: score.bonusEfficacite,
+                penalite: score.penalite.toFixed(2),
+                scoreFinal: score.scoreFinal,
+                onClose: () => {
+                    savePopulationScore(score.scoreFinal, score.difficulty);
+                    quitPopulationGame();
+                }
+            });
         }
+
 
         function savePopulationScore(scoreFinal, difficulty) {
             if (!currentPlayer || !playerData[currentPlayer]) {
