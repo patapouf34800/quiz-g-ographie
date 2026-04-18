@@ -5257,7 +5257,7 @@
             availableCountries: [],
             categories: [],
             difficulty: 'facile', // facile, difficile, enfer
-            maxCountries: Infinity // Limite de pays (Infinity pour facile, 7 pour difficile, etc.)
+            maxCountries: 15 // Limite de pays (15 pour facile, 10 pour difficile, 10 pour enfer)
         };
 
         function startPopulationGame() {
@@ -5293,7 +5293,7 @@
             // Définir la limite de pays selon la difficulté
             switch (selectedDifficulty) {
                 case 'facile':
-                    populationGameState.maxCountries = Infinity; // Pas de limite
+                    populationGameState.maxCountries = 15; // 15 pays maximum
                     break;
                 case 'difficile':
                     populationGameState.maxCountries = 10;
@@ -5302,7 +5302,7 @@
                     populationGameState.maxCountries = 10; // + contrainte géographique
                     break;
                 default:
-                    populationGameState.maxCountries = Infinity;
+                    populationGameState.maxCountries = 15;
             }
             
             console.log(`🎮 Mode: ${selectedDifficulty} - Limite: ${populationGameState.maxCountries} pays`);
@@ -5359,12 +5359,9 @@
             const limitDisplay = document.getElementById('countriesLimitDisplay');
             const continentsIndicator = document.getElementById('continentsIndicator');
             
-            if (populationGameState.maxCountries !== Infinity) {
-                limitDisplay.style.display = 'inline-block';
-                updateRemainingCountries();
-            } else {
-                limitDisplay.style.display = 'none';
-            }
+            // Toujours afficher le compteur de pays restants
+            limitDisplay.style.display = 'inline-block';
+            updateRemainingCountries();
             
             // Afficher l'indicateur de continents en mode enfer
             if (selectedDifficulty === 'enfer') {
@@ -5622,19 +5619,17 @@
         }
 
         function updateRemainingCountries() {
-            if (populationGameState.maxCountries !== Infinity) {
-                const remaining = populationGameState.maxCountries - populationGameState.selectedCountries.length;
-                document.getElementById('remainingCountries').textContent = remaining;
-                
-                // Changer la couleur si proche de la limite
-                const remainingElement = document.getElementById('remainingCountries');
-                if (remaining <= 1) {
-                    remainingElement.style.color = '#EF4444'; // Rouge
-                } else if (remaining <= 2) {
-                    remainingElement.style.color = '#F59E0B'; // Orange
-                } else {
-                    remainingElement.style.color = 'inherit';
-                }
+            const remaining = populationGameState.maxCountries - populationGameState.selectedCountries.length;
+            document.getElementById('remainingCountries').textContent = remaining;
+            
+            // Changer la couleur si proche de la limite
+            const remainingElement = document.getElementById('remainingCountries');
+            if (remaining <= 1) {
+                remainingElement.style.color = '#EF4444'; // Rouge
+            } else if (remaining <= 2) {
+                remainingElement.style.color = '#F59E0B'; // Orange
+            } else {
+                remainingElement.style.color = 'inherit';
             }
         }
 
@@ -5948,7 +5943,7 @@ Pays significatifs : ${score.paysSignificatifs}
                 availableCountries: [],
                 categories: [],
                 difficulty: 'facile',
-                maxCountries: Infinity
+                maxCountries: 15
             };
         }
 
