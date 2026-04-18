@@ -208,20 +208,15 @@
                         }
                     }
                     
-                    // Compter drapeaux, badges et SVG
+                    // Compter drapeaux et SVG
                     const flags = requests.filter(r => r.url.includes('/flags/')).length;
-                    const badges = requests.filter(r => r.url.includes('/badges/')).length;
                     const maps = requests.filter(r => r.url.includes('/maps/') || r.url.includes('.svg')).length;
                     
                     log(`  🏴 ${flags} drapeaux en cache`);
-                    log(`  🏅 ${badges} badges en cache`);
                     log(`  🗺️ ${maps} cartes SVG en cache`);
                     
                     if (flags < 195) {
                         log(`  ⚠️ Il manque ${195 - flags} drapeaux !`, 'warning');
-                    }
-                    if (badges < 18) {
-                        log(`  ⚠️ Il manque ${18 - badges} badges !`, 'warning');
                     }
                     if (maps < 9) {
                         log(`  ⚠️ Il manque ${9 - maps} cartes SVG !`, 'warning');
@@ -229,7 +224,7 @@
                 }
                 
                 // Mise à jour du statut
-                const expectedFiles = 6 + 9 + 195 + 18; // essentials + maps + flags + badges
+                const expectedFiles = 6 + 9 + 195; // essentials + maps + flags (pas de badges car émojis)
                 const percentage = Math.round((totalFiles / expectedFiles) * 100);
                 
                 document.getElementById('progressBar').style.width = percentage + '%';

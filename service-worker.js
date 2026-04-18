@@ -1,5 +1,5 @@
 // Service Worker pour Géo Quiz - Mode hors ligne
-const CACHE_NAME = 'geo-quiz-v1.0.4';
+const CACHE_NAME = 'geo-quiz-v1.0.5';
 
 // Liste des fichiers essentiels (chargés lors de l'installation)
 const ESSENTIAL_FILES = [
@@ -72,26 +72,6 @@ self.addEventListener('install', (event) => {
                         );
                         console.log(`[Service Worker] Drapeaux ${i + 1}-${Math.min(i + 20, flagUrls.length)} en cache`);
                     }
-                    
-                    // Mettre en cache tous les badges
-                    const badgeIds = [
-                        'decouverte', 'globe-trotteur', 'maitre-geographie', 'dieu-geographie',
-                        'explorateur-europeen', 'sage-asiatique', 'aventurier-africain',
-                        'conquistador-americain', 'navigateur-oceanien', 'tenace', 'genie',
-                        'professeur', 'legende', 'connaisseur-capitales', 'expert-capitales',
-                        'maitre-capitales', 'collectionneur-drapeaux', 'expert-drapeaux'
-                    ];
-                    const badgeUrls = badgeIds.map(id => `./badges/${id}.png`);
-                    
-                    console.log('[Service Worker] Mise en cache des badges...');
-                    for (const badgeUrl of badgeUrls) {
-                        try {
-                            await cache.add(badgeUrl);
-                        } catch (err) {
-                            console.warn(`[Service Worker] ⚠️ Badge ${badgeUrl}:`, err);
-                        }
-                    }
-                    console.log('[Service Worker] ✅ Badges terminés');
                     
                     console.log('[Service Worker] 🎉 Tous les fichiers sont en cache !');
                     console.log('[Service Worker] ✈️ L\'application fonctionne maintenant hors ligne');
