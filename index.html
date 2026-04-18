@@ -1717,42 +1717,45 @@
         .category-countries.flags-only {
             display: grid !important; /* Forcer l'affichage en mode enfer */
             grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 12px;
+            gap: 15px;
             max-height: 600px;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
+            padding: 25px;
+            background: transparent; /* Pas de fond blanc pour éviter le double cadre */
+            border-radius: 0;
+            border: none; /* Supprimer la bordure du haut */
         }
 
         .country-item.flag-only {
-            padding: 12px;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             aspect-ratio: 1;
-            background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
-            border-radius: 10px;
+            background: white;
+            border-radius: 12px;
             border: 2px solid #E0E0E0;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .country-item.flag-only::before {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 10px;
+            border-radius: 12px;
             background: linear-gradient(135deg, rgba(255, 111, 0, 0.1), rgba(244, 81, 30, 0.1));
             opacity: 0;
-            transition: opacity 0.25s;
+            transition: opacity 0.3s;
         }
 
         .country-item.flag-only:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(255, 111, 0, 0.25);
+            transform: translateY(-6px);
+            box-shadow: 0 12px 24px rgba(255, 111, 0, 0.2);
             border-color: #FF6F00;
-            background: white;
+            border-width: 3px;
         }
 
         .country-item.flag-only:hover::before {
@@ -1760,10 +1763,11 @@
         }
 
         .country-item.flag-only.selected {
-            background: linear-gradient(135deg, #A5D6A7 0%, #81C784 100%);
+            background: linear-gradient(135deg, #81C784 0%, #66BB6A 100%);
             border-color: #388E3C;
-            transform: scale(0.95);
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+            border-width: 3px;
+            transform: scale(0.92);
+            box-shadow: 0 2px 8px rgba(56, 142, 60, 0.3);
         }
 
         .country-item.flag-only.selected::before {
@@ -1771,18 +1775,26 @@
         }
 
         .country-item.flag-only.selected:hover {
-            transform: scale(0.95);
+            transform: scale(0.92);
             cursor: not-allowed;
         }
 
         .country-flag {
-            font-size: 2.5em;
+            font-size: 2.8em;
+            line-height: 1;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-            transition: filter 0.25s;
+            transition: filter 0.3s, transform 0.3s;
+            position: relative;
+            z-index: 1;
         }
 
         .country-item.flag-only:hover .country-flag {
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+            transform: scale(1.1);
+        }
+
+        .country-item.flag-only.selected .country-flag {
+            filter: brightness(1.1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
         }
 
         .country-name {
