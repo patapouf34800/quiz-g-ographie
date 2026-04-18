@@ -1061,6 +1061,38 @@
             border-radius: 8px;
         }
 
+        .game-rules {
+            margin-top: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .rules-header {
+            font-size: 1em;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            opacity: 0.95;
+        }
+
+        .rules-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rule-item {
+            font-size: 0.95em;
+            color: white;
+            opacity: 0.9;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            border-left: 3px solid rgba(255, 255, 255, 0.4);
+        }
+
         .game-buttons {
             display: flex;
             gap: 10px;
@@ -2566,6 +2598,17 @@
                         Pays restants : <strong id="remainingCountries">10</strong>
                     </span>
                 </div>
+                
+                <!-- Règles du jeu -->
+                <div class="game-rules" id="gameRules">
+                    <div class="rules-header">📋 Règles</div>
+                    <div class="rules-content">
+                        <span class="rule-item">🎯 Objectif : Dépasse l'objectif de population</span>
+                        <span class="rule-item" id="ruleLimit">⚠️ Limite : 10 pays maximum</span>
+                        <span class="rule-item" id="ruleContinents" style="display: none;">🌍 Mode enfer : Représente les 6 continents</span>
+                    </div>
+                </div>
+                
                 <!-- Indicateur des continents (mode enfer uniquement) -->
                 <div id="continentsIndicator" style="display: none; margin-top: 10px; font-size: 0.9em;">
                     <span style="opacity: 0.8;">Continents :</span>
@@ -5293,6 +5336,18 @@
             // Afficher la difficulté
             document.getElementById('currentDifficulty').textContent = 
                 selectedDifficulty.charAt(0).toUpperCase() + selectedDifficulty.slice(1);
+            
+            // Mettre à jour les règles affichées
+            const ruleLimit = document.getElementById('ruleLimit');
+            const ruleContinents = document.getElementById('ruleContinents');
+            
+            ruleLimit.textContent = `⚠️ Limite : ${populationGameState.maxCountries} pays maximum`;
+            
+            if (selectedDifficulty === 'enfer') {
+                ruleContinents.style.display = 'block';
+            } else {
+                ruleContinents.style.display = 'none';
+            }
             
             // Afficher l'indicateur de limite de pays si applicable
             const limitDisplay = document.getElementById('countriesLimitDisplay');
