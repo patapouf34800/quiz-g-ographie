@@ -1696,6 +1696,49 @@
             opacity: 0.6;
         }
 
+        /* Mode enfer : affichage des drapeaux uniquement */
+        .category-card.enfer-mode {
+            background: #FFF3E0;
+            border-color: #FF6F00;
+        }
+
+        .category-card.enfer-mode .category-title {
+            color: #E65100;
+        }
+
+        .category-countries.flags-only {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            max-height: 500px;
+        }
+
+        .country-item.flag-only {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .country-item.flag-only:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+            border-color: #FF6F00;
+        }
+
+        .country-item.flag-only.selected {
+            background: #DCFCE7;
+            border-color: #48BB78;
+            transform: scale(0.9);
+        }
+
+        .country-flag {
+            font-size: 2em;
+        }
+
         .country-name {
             font-weight: 600;
             color: #00838F;
@@ -5246,36 +5289,29 @@
             const grid = document.getElementById('categoriesGrid');
             grid.innerHTML = '';
             
-            populationGameState.categories.forEach((category, index) => {
+            // Mode enfer : liste alphabétique avec drapeaux uniquement
+            if (populationGameState.difficulty === 'enfer') {
+                // Trier tous les pays par ordre alphabétique
+                const sortedCountries = [...populationGameState.availableCountries].sort((a, b) => 
+                    a.nom.localeCompare(b.nom, 'fr')
+                );
+                
+                // Créer une seule "carte" contenant tous les pays
                 const card = document.createElement('div');
-                card.className = 'category-card';
+                card.className = 'category-card expanded enfer-mode';
                 card.innerHTML = `
                     <div class="category-header">
-                        <div class="category-title">${category.icon} ${category.name}</div>
-                        <div class="category-count">${category.countries.length}</div>
+                        <div class="category-title">🔥 Tous les pays (drapeaux uniquement)</div>
+                        <div class="category-count">${sortedCountries.length}</div>
                     </div>
-                    <div class="category-range">Population dans cette tranche</div>
-                    <div class="category-countries" id="category-${index}">
-                        ${category.countries.map(country => `
-                            <div class="country-item" data-iso2="${country.iso2}">
-                                <span class="country-name">${country.nom}</span>
+                    <div class="category-countries flags-only" id="category-enfer">
+                        ${sortedCountries.map(country => `
+                            <div class="country-item flag-only" data-iso2="${country.iso2}" title="">
+                                <span class="country-flag">${getCountryFlag(country.iso2)}</span>
                             </div>
                         `).join('')}
                     </div>
                 `;
-                
-                // Toggle expansion de la catégorie (ouvrir ET fermer)
-                const header = card.querySelector('.category-header');
-                header.addEventListener('click', () => {
-                    // Fermer toutes les autres catégories d'abord
-                    document.querySelectorAll('.category-card').forEach(c => {
-                        if (c !== card) {
-                            c.classList.remove('expanded');
-                        }
-                    });
-                    // Toggle celle-ci
-                    card.classList.toggle('expanded');
-                });
                 
                 // Gérer les clics sur les pays
                 const countryItems = card.querySelectorAll('.country-item');
@@ -5288,7 +5324,61 @@
                 });
                 
                 grid.appendChild(card);
-            });
+            } else {
+                // Modes facile et difficile : catégories normales
+                populationGameState.categories.forEach((category, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+                    card.innerHTML = `
+                        <div class="category-header">
+                            <div class="category-title">${category.icon} ${category.name}</div>
+                            <div class="category-count">${category.countries.length}</div>
+                        </div>
+                        <div class="category-range">Population dans cette tranche</div>
+                        <div class="category-countries" id="category-${index}">
+                            ${category.countries.map(country => `
+                                <div class="country-item" data-iso2="${country.iso2}">
+                                    <span class="country-name">${country.nom}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    
+                    // Toggle expansion de la catégorie (ouvrir ET fermer)
+                    const header = card.querySelector('.category-header');
+                    header.addEventListener('click', () => {
+                        // Fermer toutes les autres catégories d'abord
+                        document.querySelectorAll('.category-card').forEach(c => {
+                            if (c !== card) {
+                                c.classList.remove('expanded');
+                            }
+                        });
+                        // Toggle celle-ci
+                        card.classList.toggle('expanded');
+                    });
+                    
+                    // Gérer les clics sur les pays
+                    const countryItems = card.querySelectorAll('.country-item');
+                    countryItems.forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const iso2 = item.dataset.iso2;
+                            selectCountry(iso2);
+                        });
+                    });
+                    
+                    grid.appendChild(card);
+                });
+            }
+        }
+        
+        // Fonction pour obtenir le drapeau emoji d'un pays
+        function getCountryFlag(iso2) {
+            if (!iso2 || iso2.length !== 2) return '🏳️';
+            const codePoints = iso2.toUpperCase().split('').map(char => 
+                127397 + char.charCodeAt(0)
+            );
+            return String.fromCodePoint(...codePoints);
         }
 
         function selectCountry(iso2) {
