@@ -1,5 +1,5 @@
 // Service Worker pour Géo Quiz - Mode hors ligne
-const CACHE_NAME = 'geo-quiz-v1.0.1';
+const CACHE_NAME = 'geo-quiz-v1.0.2';
 
 // Liste des fichiers essentiels (chargés lors de l'installation)
 const ESSENTIAL_FILES = [
@@ -8,7 +8,19 @@ const ESSENTIAL_FILES = [
     './manifest.json',
     './countries_fr_complet.json',
     './icon-192.png',
-    './icon-512.png'
+    './icon-512.png',
+    './map-manager.js'
+];
+
+// Liste des SVG des cartes (zones géographiques)
+const MAP_SVGS = [
+    './maps/monde.svg',
+    './maps/europe.svg',
+    './maps/asie.svg',
+    './maps/afrique.svg',
+    './maps/amerique-nord.svg',
+    './maps/amerique-sud.svg',
+    './maps/oceanie.svg'
 ];
 
 // Installation du Service Worker
@@ -22,6 +34,18 @@ self.addEventListener('install', (event) => {
                 // Mettre en cache les fichiers essentiels
                 await cache.addAll(ESSENTIAL_FILES);
                 console.log('[Service Worker] ✅ Fichiers essentiels en cache');
+                
+                // Mettre en cache les SVG des cartes
+                console.log('[Service Worker] Mise en cache des cartes SVG...');
+                await Promise.all(
+                    MAP_SVGS.map(url => 
+                        cache.add(url).catch(err => {
+                            console.warn(`[Service Worker] ⚠️ Impossible de cacher ${url}:`, err);
+                            return null;
+                        })
+                    )
+                );
+                console.log('[Service Worker] ✅ Cartes SVG en cache');
                 
                 // Charger le JSON pour connaître tous les pays
                 try {
