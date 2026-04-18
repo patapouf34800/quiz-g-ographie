@@ -1,6 +1,8 @@
 // Service Worker pour Géo Quiz - Mode hors ligne
-const CACHE_NAME = 'geo-quiz-v1.0.0';
-const urlsToCache = [
+const CACHE_NAME = 'geo-quiz-v1.0.1';
+
+// Liste des fichiers essentiels (chargés lors de l'installation)
+const ESSENTIAL_FILES = [
     './',
     './index.html',
     './manifest.json',
@@ -14,12 +16,66 @@ self.addEventListener('install', (event) => {
     console.log('[Service Worker] Installation...');
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[Service Worker] Mise en cache des fichiers principaux');
-                return cache.addAll(urlsToCache);
+            .then(async (cache) => {
+                console.log('[Service Worker] Mise en cache des fichiers essentiels');
+                
+                // Mettre en cache les fichiers essentiels
+                await cache.addAll(ESSENTIAL_FILES);
+                console.log('[Service Worker] ✅ Fichiers essentiels en cache');
+                
+                // Charger le JSON pour connaître tous les pays
+                try {
+                    const response = await fetch('./countries_fr_complet.json');
+                    const countries = await response.json();
+                    console.log(`[Service Worker] ${countries.length} pays trouvés`);
+                    
+                    // Mettre en cache tous les drapeaux
+                    const flagUrls = countries.map(c => `./flags/${c.iso2.toLowerCase()}.png`);
+                    console.log('[Service Worker] Mise en cache des drapeaux...');
+                    
+                    // Mettre en cache par lots de 20 pour éviter les erreurs
+                    for (let i = 0; i < flagUrls.length; i += 20) {
+                        const batch = flagUrls.slice(i, i + 20);
+                        await Promise.all(
+                            batch.map(url => 
+                                cache.add(url).catch(err => {
+                                    console.warn(`[Service Worker] ⚠️ Impossible de cacher ${url}:`, err);
+                                    return null;
+                                })
+                            )
+                        );
+                        console.log(`[Service Worker] Drapeaux ${i + 1}-${Math.min(i + 20, flagUrls.length)} en cache`);
+                    }
+                    
+                    // Mettre en cache tous les badges
+                    const badgeIds = [
+                        'decouverte', 'globe-trotteur', 'maitre-geographie', 'dieu-geographie',
+                        'explorateur-europeen', 'sage-asiatique', 'aventurier-africain',
+                        'conquistador-americain', 'navigateur-oceanien', 'tenace', 'genie',
+                        'professeur', 'legende', 'connaisseur-capitales', 'expert-capitales',
+                        'maitre-capitales', 'collectionneur-drapeaux', 'expert-drapeaux'
+                    ];
+                    const badgeUrls = badgeIds.map(id => `./badges/${id}.png`);
+                    
+                    console.log('[Service Worker] Mise en cache des badges...');
+                    await Promise.all(
+                        badgeUrls.map(url => 
+                            cache.add(url).catch(err => {
+                                console.warn(`[Service Worker] ⚠️ Impossible de cacher ${url}:`, err);
+                                return null;
+                            })
+                        )
+                    );
+                    console.log('[Service Worker] ✅ Badges en cache');
+                    
+                    console.log('[Service Worker] 🎉 Tous les fichiers sont en cache !');
+                    console.log('[Service Worker] ✈️ L\'application fonctionne maintenant hors ligne');
+                } catch (error) {
+                    console.error('[Service Worker] ❌ Erreur lors de la mise en cache complète:', error);
+                }
             })
             .catch((error) => {
-                console.error('[Service Worker] Erreur lors de la mise en cache:', error);
+                console.error('[Service Worker] ❌ Erreur lors de l\'installation:', error);
             })
     );
     // Force l'activation immédiate
@@ -46,129 +102,121 @@ self.addEventListener('activate', (event) => {
     return self.clients.claim();
 });
 
-// Interception des requêtes
+// Interception des requêtes - Stratégie Cache First (hors ligne d'abord)
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    
-    // Stratégie pour les drapeaux et badges : CacheFirst (ils ne changent jamais)
-    if (url.pathname.includes('/flags/') || url.pathname.includes('/badges/')) {
-        event.respondWith(
-            caches.match(event.request).then((response) => {
-                if (response) {
-                    return response;
-                }
-                // Si pas en cache, télécharger et mettre en cache
-                return fetch(event.request).then((fetchResponse) => {
-                    return caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, fetchResponse.clone());
-                        return fetchResponse;
-                    });
-                });
-            })
-        );
-        return;
-    }
-    
-    // Stratégie Network First pour les autres fichiers
-    // (tente d'abord le réseau, sinon utilise le cache)
     event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Si la requête réussit, mettre à jour le cache
-                if (response && response.status === 200) {
-                    const responseToCache = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
-                }
-                return response;
-            })
-            .catch(() => {
-                // En cas d'échec réseau, utiliser le cache
-                return caches.match(event.request).then((response) => {
-                    if (response) {
-                        console.log('[Service Worker] Récupération depuis le cache:', event.request.url);
-                        return response;
-                    }
-                    // Si pas de cache non plus, retourner une page d'erreur pour les pages HTML
-                    if (event.request.headers.get('accept').includes('text/html')) {
-                        return new Response(
-                            `<!DOCTYPE html>
-                            <html lang="fr">
-                            <head>
-                                <meta charset="UTF-8">
-                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                <title>Hors ligne - Géo Quiz</title>
-                                <style>
-                                    body {
-                                        font-family: 'Segoe UI', Arial, sans-serif;
-                                        background: linear-gradient(135deg, #00838F, #00ACC1);
-                                        min-height: 100vh;
-                                        display: flex;
-                                        align-items: center;
-                                        justify-content: center;
-                                        margin: 0;
-                                        padding: 20px;
-                                    }
-                                    .offline-message {
-                                        background: white;
-                                        padding: 40px;
-                                        border-radius: 20px;
-                                        text-align: center;
-                                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-                                        max-width: 500px;
-                                    }
-                                    .offline-icon {
-                                        font-size: 4em;
-                                        margin-bottom: 20px;
-                                    }
-                                    h1 {
-                                        color: #00838F;
-                                        margin-bottom: 15px;
-                                    }
-                                    p {
-                                        color: #666;
-                                        line-height: 1.6;
-                                    }
-                                    .retry-btn {
-                                        background: linear-gradient(135deg, #00ACC1, #00838F);
-                                        color: white;
-                                        border: none;
-                                        padding: 15px 30px;
-                                        border-radius: 10px;
-                                        font-size: 1em;
-                                        font-weight: bold;
-                                        cursor: pointer;
-                                        margin-top: 20px;
-                                    }
-                                    .retry-btn:hover {
-                                        transform: translateY(-2px);
-                                        box-shadow: 0 5px 15px rgba(0,172,193,0.4);
-                                    }
-                                </style>
-                            </head>
-                            <body>
-                                <div class="offline-message">
-                                    <div class="offline-icon">📡</div>
-                                    <h1>Mode Hors Ligne</h1>
-                                    <p>
-                                        Tu n'es pas connecté à Internet et cette page n'est pas disponible hors ligne.
-                                    </p>
-                                    <p>
-                                        Vérifie ta connexion et réessaie.
-                                    </p>
-                                    <button class="retry-btn" onclick="window.location.reload()">
-                                        🔄 Réessayer
-                                    </button>
-                                </div>
-                            </body>
-                            </html>`,
-                            {
-                                headers: { 'Content-Type': 'text/html' }
+        caches.match(event.request)
+            .then((cachedResponse) => {
+                // Si en cache, retourner immédiatement
+                if (cachedResponse) {
+                    // En parallèle, mettre à jour le cache en arrière-plan
+                    fetch(event.request)
+                        .then((networkResponse) => {
+                            if (networkResponse && networkResponse.status === 200) {
+                                caches.open(CACHE_NAME).then((cache) => {
+                                    cache.put(event.request, networkResponse);
+                                });
                             }
-                        );
-                    }
-                });
+                        })
+                        .catch(() => {
+                            // Pas grave si le réseau échoue, on a déjà le cache
+                        });
+                    
+                    return cachedResponse;
+                }
+                
+                // Si pas en cache, tenter le réseau
+                return fetch(event.request)
+                    .then((networkResponse) => {
+                        // Mettre en cache pour la prochaine fois
+                        if (networkResponse && networkResponse.status === 200) {
+                            const responseToCache = networkResponse.clone();
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(event.request, responseToCache);
+                            });
+                        }
+                        return networkResponse;
+                    })
+                    .catch(() => {
+                        // Ni cache ni réseau disponible
+                        // Retourner une page d'erreur pour les pages HTML
+                        if (event.request.headers.get('accept').includes('text/html')) {
+                            return new Response(
+                                `<!DOCTYPE html>
+                                <html lang="fr">
+                                <head>
+                                    <meta charset="UTF-8">
+                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                    <title>Hors ligne - Géo Quiz</title>
+                                    <style>
+                                        body {
+                                            font-family: 'Segoe UI', Arial, sans-serif;
+                                            background: linear-gradient(135deg, #00838F, #00ACC1);
+                                            min-height: 100vh;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            margin: 0;
+                                            padding: 20px;
+                                        }
+                                        .offline-message {
+                                            background: white;
+                                            padding: 40px;
+                                            border-radius: 20px;
+                                            text-align: center;
+                                            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                                            max-width: 500px;
+                                        }
+                                        .offline-icon {
+                                            font-size: 4em;
+                                            margin-bottom: 20px;
+                                        }
+                                        h1 {
+                                            color: #00838F;
+                                            margin-bottom: 15px;
+                                        }
+                                        p {
+                                            color: #666;
+                                            line-height: 1.6;
+                                        }
+                                        .retry-btn {
+                                            background: linear-gradient(135deg, #00ACC1, #00838F);
+                                            color: white;
+                                            border: none;
+                                            padding: 15px 30px;
+                                            border-radius: 10px;
+                                            font-size: 1em;
+                                            font-weight: bold;
+                                            cursor: pointer;
+                                            margin-top: 20px;
+                                        }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class="offline-message">
+                                        <div class="offline-icon">📡</div>
+                                        <h1>Ressource non disponible</h1>
+                                        <p>
+                                            Cette ressource n'a pas pu être chargée et n'est pas disponible hors ligne.
+                                        </p>
+                                        <button class="retry-btn" onclick="window.location.reload()">
+                                            🔄 Réessayer
+                                        </button>
+                                    </div>
+                                </body>
+                                </html>`,
+                                {
+                                    headers: { 'Content-Type': 'text/html' }
+                                }
+                            );
+                        }
+                        
+                        // Pour les autres ressources, retourner une erreur
+                        return new Response('Ressource non disponible hors ligne', {
+                            status: 503,
+                            statusText: 'Service Unavailable'
+                        });
+                    });
             })
     );
 });

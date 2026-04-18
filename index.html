@@ -2362,6 +2362,9 @@
                     <div class="stats">
                         <span id="playerCollectionCount">0</span> pays découverts • 
                         <span id="playerBadgeCount">0</span> badges
+                        <span id="offlineIndicator" style="margin-left: 10px; display: none;">
+                            <span style="color: #10B981;">✈️ Mode hors ligne prêt</span>
+                        </span>
                     </div>
                 </div>
                 <button class="btn-change-player" id="changePlayerBtn">Changer de joueur</button>
@@ -6415,10 +6418,36 @@
                 navigator.serviceWorker.register('./service-worker.js')
                     .then((registration) => {
                         console.log('✅ Service Worker enregistré:', registration);
+                        
+                        // Écouter les mises à jour du SW
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    console.log('✈️ Mode hors ligne activé !');
+                                    showOfflineIndicator();
+                                }
+                            });
+                        });
+                        
+                        // Si déjà activé
+                        if (registration.active) {
+                            console.log('✈️ Mode hors ligne déjà activé !');
+                            // Vérifier après un petit délai pour laisser le cache se remplir
+                            setTimeout(showOfflineIndicator, 2000);
+                        }
                     })
                     .catch((error) => {
                         console.log('❌ Erreur Service Worker:', error);
                     });
+            }
+            
+            function showOfflineIndicator() {
+                const indicator = document.getElementById('offlineIndicator');
+                if (indicator) {
+                    indicator.style.display = 'inline';
+                    console.log('✅ Indicateur hors ligne affiché');
+                }
             }
         });
     </script>
