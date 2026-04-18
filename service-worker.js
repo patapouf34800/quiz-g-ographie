@@ -1,5 +1,5 @@
 // Service Worker pour Géo Quiz - Mode hors ligne
-const CACHE_NAME = 'geo-quiz-v1.0.2';
+const CACHE_NAME = 'geo-quiz-v1.0.3';
 
 // Liste des fichiers essentiels (chargés lors de l'installation)
 const ESSENTIAL_FILES = [
@@ -14,13 +14,15 @@ const ESSENTIAL_FILES = [
 
 // Liste des SVG des cartes (zones géographiques)
 const MAP_SVGS = [
-    './maps/monde.svg',
-    './maps/europe.svg',
-    './maps/asie.svg',
-    './maps/afrique.svg',
-    './maps/amerique-nord.svg',
-    './maps/amerique-sud.svg',
-    './maps/oceanie.svg'
+    './worldLow.svg',
+    './region_world_europeLow.svg',
+    './region_world_asiaLow.svg',
+    './region_world_africaLow.svg',
+    './region_world_northAmericaLow.svg',
+    './region_world_southAmericaLow.svg',
+    './region_world_oceaniaLow.svg',
+    './continentsLow.svg',
+    './region_world_latinAmericaLow.svg'
 ];
 
 // Installation du Service Worker
