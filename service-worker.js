@@ -94,8 +94,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    // Supprimer les anciens caches
-                    if (cacheName !== CACHE_NAME) {
+                    // Supprimer UNIQUEMENT les anciens caches Géo (qui commencent par "geo-quiz-")
+                    if (cacheName.startsWith('geo-quiz-') && cacheName !== CACHE_NAME) {
                         console.log('[Service Worker] Suppression ancien cache:', cacheName);
                         return caches.delete(cacheName);
                     }
