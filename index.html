@@ -5208,16 +5208,29 @@
         }
 
         function createPopulationCategories() {
-            const categories = [
-                { name: '< 1M', min: 0, max: 1000000, icon: '🏘️' },
-                { name: '1M - 10M', min: 1000000, max: 10000000, icon: '🏙️' },
-                { name: '10M - 50M', min: 10000000, max: 50000000, icon: '🌆' },
-                { name: '50M - 100M', min: 50000000, max: 100000000, icon: '🏢' },
-                { name: '100M - 200M', min: 100000000, max: 200000000, icon: '🌃' },
-                { name: '200M - 500M', min: 200000000, max: 500000000, icon: '🌉' },
-                { name: '500M - 1Md', min: 500000000, max: 1000000000, icon: '🏛️' },
-                { name: '> 1Md', min: 1000000000, max: Infinity, icon: '🌏' }
-            ];
+            let categories;
+            
+            // Catégories différentes selon la difficulté
+            if (populationGameState.difficulty === 'difficile') {
+                // Mode difficile : 3 catégories fusionnées
+                categories = [
+                    { name: '< 100M', min: 0, max: 100000000, icon: '🏙️' },
+                    { name: '< 300M', min: 100000000, max: 300000000, icon: '🌆' },
+                    { name: '< 1500M', min: 300000000, max: 1500000000, icon: '🌏' }
+                ];
+            } else {
+                // Mode facile (et enfer pour l'instant) : 8 catégories détaillées
+                categories = [
+                    { name: '< 1M', min: 0, max: 1000000, icon: '🏘️' },
+                    { name: '1M - 10M', min: 1000000, max: 10000000, icon: '🏙️' },
+                    { name: '10M - 50M', min: 10000000, max: 50000000, icon: '🌆' },
+                    { name: '50M - 100M', min: 50000000, max: 100000000, icon: '🏢' },
+                    { name: '100M - 200M', min: 100000000, max: 200000000, icon: '🌃' },
+                    { name: '200M - 500M', min: 200000000, max: 500000000, icon: '🌉' },
+                    { name: '500M - 1Md', min: 500000000, max: 1000000000, icon: '🏛️' },
+                    { name: '> 1Md', min: 1000000000, max: Infinity, icon: '🌏' }
+                ];
+            }
             
             populationGameState.categories = categories.map(cat => {
                 const countries = populationGameState.availableCountries.filter(
