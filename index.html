@@ -5760,11 +5760,23 @@
             
             console.log('Multiplicateur risque:', multiplicateurRisque.toFixed(3));
             
-            // 3. Pénalité de Dépassement
+            // 3. Bonus d'Efficacité (courbe en cloche)
+            // Récompense l'utilisation optimale d'environ 50% de la limite
+            const maxCountries = populationGameState.maxCountries;
+            const ratioUtilisation = paysACompter / maxCountries;
+            
+            // Courbe gaussienne : max 30% de bonus à 50% d'utilisation
+            // 0% si 1 pays ou 100% de la limite
+            const bonusEfficacite = 0.30 * Math.exp(-8 * Math.pow(ratioUtilisation - 0.5, 2));
+            
+            console.log('Ratio utilisation:', (ratioUtilisation * 100).toFixed(1), '%');
+            console.log('Bonus efficacité:', (bonusEfficacite * 100).toFixed(1), '%');
+            
+            // 4. Pénalité de Dépassement
             const penalite = exceeded ? 0.5 : 1.0;
             
-            // Score Final
-            const scoreFinal = Math.round(scoreDistance * multiplicateurRisque * penalite);
+            // Score Final (avec bonus d'efficacité)
+            const scoreFinal = Math.round(scoreDistance * multiplicateurRisque * (1 + bonusEfficacite) * penalite);
             
             console.log('Score final:', scoreFinal);
             console.log('===================');
@@ -5773,6 +5785,7 @@
                 scoreFinal,
                 scoreDistance: Math.round(scoreDistance),
                 multiplicateurRisque: multiplicateurRisque.toFixed(2),
+                bonusEfficacite: (bonusEfficacite * 100).toFixed(0) + '%',
                 paysSignificatifs,
                 penalite,
                 difficulty: populationGameState.difficulty // Ajouter la difficulté pour l'enregistrement
@@ -5823,6 +5836,7 @@ Pays significatifs : ${score.paysSignificatifs}
 🎯 SCORE : ${score.scoreFinal} points
    ├─ Distance : ${score.scoreDistance} pts
    ├─ Risque : ×${score.multiplicateurRisque}
+   ├─ Efficacité : +${score.bonusEfficacite}
    └─ Pénalité : ×${score.penalite} (dépassement)`);
             } else {
                 alert(`🎉 BRAVO !
@@ -5837,6 +5851,7 @@ Pays significatifs : ${score.paysSignificatifs}
 🎯 SCORE : ${score.scoreFinal} points
    ├─ Distance : ${score.scoreDistance} pts
    ├─ Risque : ×${score.multiplicateurRisque}
+   ├─ Efficacité : +${score.bonusEfficacite}
    └─ Pénalité : ×${score.penalite}`);
             }
             
