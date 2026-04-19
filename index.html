@@ -2893,6 +2893,7 @@
                     id="countryInput" 
                     placeholder="Tape le nom d'un pays..."
                     autocomplete="off"
+                    oninput="autoCheckInput()"
                 >
                 <div class="input-feedback" id="inputFeedback"></div>
             </div>
@@ -5273,6 +5274,109 @@
                     
                     // Mettre à jour les stats
                     updateGameStats();
+                }
+            }
+        }
+
+        // Auto-validation pour les modes "Nomme les pays" et "Capitales"
+        function autoCheckInput() {
+            const input = document.getElementById('countryInput');
+            const feedback = document.getElementById('inputFeedback');
+            const guess = input.value.trim();
+
+            if (!guess) return;
+
+            const normalizedGuess = normalizeString(guess);
+
+            // MODE NOMME LES PAYS
+            if (selectedMode === 'nomme-pays') {
+                const country = currentGameCountries.find(c => {
+                    const normalizedName = normalizeString(c.nom);
+                    return normalizedName === normalizedGuess;
+                });
+
+                if (country) {
+                    // Vérifier si déjà trouvé
+                    if (foundCountries.includes(country.iso2)) {
+                        feedback.textContent = `✅ ${country.nom} est déjà trouvé !`;
+                        feedback.className = 'input-feedback show incorrect';
+                        input.value = '';
+                        
+                        setTimeout(() => {
+                            feedback.classList.remove('show');
+                        }, 2000);
+                        return;
+                    }
+
+                    // CORRECT !
+                    foundCountries.push(country.iso2);
+                    
+                    // Colorer sur la carte
+                    if (currentMap) {
+                        currentMap.colorCountry(country.nom);
+                    }
+
+                    // Feedback positif
+                    feedback.textContent = `✅ Bravo ! ${country.nom} 🎉`;
+                    feedback.className = 'input-feedback show correct';
+
+                    // Mettre à jour la liste complète
+                    updateFoundList();
+
+                    // Mettre à jour les stats
+                    updateGameStats();
+
+                    input.value = '';
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                    }, 1500);
+                }
+            }
+            
+            // MODE CAPITALES
+            else if (selectedMode === 'capitales') {
+                const country = currentGameCountries.find(c => {
+                    const normalizedCapital = normalizeString(c.capitale);
+                    return normalizedCapital === normalizedGuess;
+                });
+
+                if (country) {
+                    // Vérifier si déjà trouvé
+                    if (foundCountries.includes(country.iso2)) {
+                        feedback.textContent = `✅ ${country.capitale} (${country.nom}) est déjà trouvé !`;
+                        feedback.className = 'input-feedback show incorrect';
+                        input.value = '';
+                        
+                        setTimeout(() => {
+                            feedback.classList.remove('show');
+                        }, 2000);
+                        return;
+                    }
+
+                    // CORRECT !
+                    foundCountries.push(country.iso2);
+                    
+                    // Colorer sur la carte
+                    if (currentMap) {
+                        currentMap.colorCountry(country.nom);
+                    }
+
+                    // Feedback positif
+                    feedback.textContent = `✅ Bravo ! ${country.capitale} (${country.nom}) 🎉`;
+                    feedback.className = 'input-feedback show correct';
+
+                    // Mettre à jour la liste complète
+                    updateFoundList();
+
+                    // Mettre à jour les stats
+                    updateGameStats();
+
+                    input.value = '';
+
+                    setTimeout(() => {
+                        feedback.classList.remove('show');
+                    }, 1500);
                 }
             }
         }
