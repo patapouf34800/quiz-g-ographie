@@ -1361,9 +1361,9 @@
 
         .flags-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
+            grid-template-columns: repeat(13, 1fr);
+            gap: 15px;
+            max-width: 100%;
             margin: 0 auto;
         }
 
@@ -1371,7 +1371,7 @@
             background: #f9f9f9;
             border: 3px solid #e0e0e0;
             border-radius: 12px;
-            padding: 15px;
+            padding: 10px;
             text-align: center;
             transition: all 0.3s;
         }
@@ -1387,9 +1387,9 @@
         }
 
         .flag-display {
-            width: 120px;
-            height: 80px;
-            margin: 0 auto 15px;
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            margin: 0 auto 10px;
             border: 2px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
@@ -1407,8 +1407,8 @@
 
         .flag-item input {
             width: 100%;
-            padding: 10px;
-            font-size: 1em;
+            padding: 8px;
+            font-size: 0.9em;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             text-align: center;
@@ -2476,6 +2476,33 @@
                     </div>
 
                     <button class="btn-start-game" id="startGameBtn">🚀 Lancer le quiz !</button>
+                </div>
+
+                <!-- Sélection du nombre de drapeaux (pour le mode drapeaux uniquement) -->
+                <div class="flags-count-selection-screen hidden" id="flagsCountSelectionScreen">
+                    <button class="btn-back" id="backToZoneFromFlagsCountBtn">← Retour</button>
+                    <div class="config-section">
+                        <h3>🏴 Combien de drapeaux veux-tu ?</h3>
+                        <div style="margin: 20px 0;">
+                            <label for="flagsCountSlider" style="display: block; margin-bottom: 10px; font-size: 1.2em; color: #00838F;">
+                                Nombre de drapeaux : <strong id="flagsCountValue">10</strong>
+                            </label>
+                            <input 
+                                type="range" 
+                                id="flagsCountSlider" 
+                                min="10" 
+                                max="195" 
+                                value="10" 
+                                style="width: 100%; max-width: 500px;"
+                            >
+                            <div style="display: flex; justify-content: space-between; max-width: 500px; font-size: 0.9em; color: #666; margin-top: 5px;">
+                                <span>Min : 10</span>
+                                <span id="flagsCountMax">Max : 195</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-start-game" id="startFlagsGameBtn">🚀 Lancer le quiz !</button>
                 </div>
 
                 <!-- Sélection de la difficulté (pour le mode "limite-population") -->
@@ -3607,12 +3634,63 @@
                 document.getElementById('gameModeSelection').classList.remove('hidden');
             });
 
+            // Bouton retour depuis le nombre de drapeaux
+            document.getElementById('backToZoneFromFlagsCountBtn').addEventListener('click', () => {
+                console.log('🔄 Retour vers sélection de zone (depuis nombre drapeaux)');
+                document.getElementById('flagsCountSelectionScreen').classList.add('hidden');
+                document.getElementById('zoneSelectionScreen').classList.remove('hidden');
+            });
+
             // Bouton retour depuis la difficulté
             document.getElementById('backToModeFromDifficultyBtn').addEventListener('click', () => {
                 console.log('🔄 Retour vers sélection de mode (depuis difficulté)');
                 document.getElementById('difficultySelectionScreen').classList.add('hidden');
                 document.getElementById('gameModeSelection').classList.remove('hidden');
             });
+        }
+
+        function showFlagsCountSelection() {
+            // Calculer le nombre de pays dans la zone sélectionnée
+            const americaNorthCodes = ['AG', 'BB', 'BS', 'BZ', 'CA', 'CR', 'CU', 'DM', 'DO', 'GD', 'GT', 'HN', 'HT', 'JM', 'KN', 'LC', 'MX', 'NI', 'PA', 'SV', 'TT', 'US', 'VC'];
+            const americaSouthCodes = ['AR', 'BO', 'BR', 'CL', 'CO', 'EC', 'GY', 'PE', 'PY', 'SR', 'UY', 'VE'];
+            
+            let maxFlags;
+            if (selectedZone === 'monde') {
+                maxFlags = 195;
+            } else if (selectedZone === 'amerique-nord') {
+                maxFlags = 23;
+            } else if (selectedZone === 'amerique-sud') {
+                maxFlags = 12;
+            } else {
+                const continentMap = {
+                    'europe': 'Europe',
+                    'asie': 'Asie',
+                    'afrique': 'Afrique',
+                    'oceanie': 'Océanie'
+                };
+                const continent = continentMap[selectedZone];
+                maxFlags = countriesData.filter(c => c.continent === continent).length;
+            }
+            
+            // Configurer le slider
+            const slider = document.getElementById('flagsCountSlider');
+            const valueDisplay = document.getElementById('flagsCountValue');
+            const maxDisplay = document.getElementById('flagsCountMax');
+            
+            slider.min = 10;
+            slider.max = maxFlags;
+            slider.value = Math.min(10, maxFlags); // Par défaut 10, ou moins si la zone a moins de 10 pays
+            valueDisplay.textContent = slider.value;
+            maxDisplay.textContent = `Max : ${maxFlags}`;
+            
+            // Mettre à jour l'affichage quand on bouge le slider
+            slider.oninput = function() {
+                valueDisplay.textContent = this.value;
+            };
+            
+            // Afficher l'écran
+            document.getElementById('zoneSelectionScreen').classList.add('hidden');
+            document.getElementById('flagsCountSelectionScreen').classList.remove('hidden');
         }
 
         function initZoneSelection() {
@@ -5220,9 +5298,12 @@
         // =====================================
 
         function initFlagsMode() {
-            // Prendre 10 pays aléatoires de la zone
+            // Récupérer le nombre de drapeaux choisi par l'utilisateur
+            const flagsCount = parseInt(document.getElementById('flagsCountSlider').value);
+            
+            // Prendre N pays aléatoires de la zone
             const shuffled = [...currentGameCountries].sort(() => Math.random() - 0.5);
-            const selectedFlags = shuffled.slice(0, 10);
+            const selectedFlags = shuffled.slice(0, flagsCount);
             
             // Sauvegarder pour la validation
             currentGameCountries = selectedFlags;
@@ -5766,7 +5847,25 @@
 
         document.getElementById('quitGameBtn').addEventListener('click', quitGame);
         document.getElementById('abandonGameBtn').addEventListener('click', abandonGame);
-        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        
+        // Bouton "Lancer le quiz" depuis la sélection de zone
+        document.getElementById('startGameBtn').addEventListener('click', () => {
+            if (!selectedZone) {
+                alert('⚠️ Merci de sélectionner une zone géographique !');
+                return;
+            }
+            
+            // Si mode drapeaux, aller vers la sélection du nombre de drapeaux
+            if (selectedMode === 'drapeaux') {
+                showFlagsCountSelection();
+            } else {
+                // Sinon, lancer le jeu normalement
+                startGame();
+            }
+        });
+        
+        // Bouton "Lancer le quiz" depuis la sélection du nombre de drapeaux
+        document.getElementById('startFlagsGameBtn').addEventListener('click', startGame);
         
         document.getElementById('countryInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
