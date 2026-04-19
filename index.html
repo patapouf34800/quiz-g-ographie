@@ -1428,6 +1428,10 @@
             font-weight: bold;
         }
 
+        .flag-item.found .flag-answer {
+            display: block;
+        }
+
         .flag-item.revealed input {
             border-color: #F59E0B;
             background: white;
@@ -5149,7 +5153,31 @@
                 feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
                 feedback.className = 'input-feedback show correct';
             } else if (selectedMode === 'drapeaux') {
-                // Pas de feedback pour le mode drapeaux
+                // Afficher un résumé de victoire pour le mode drapeaux
+                const foundList = document.getElementById('foundList');
+                let html = '<div style="margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #48BB78, #38A169); border-radius: 15px; text-align: center; color: white; box-shadow: 0 8px 20px rgba(72, 187, 120, 0.4);">';
+                html += '<h3 style="font-size: 2em; margin-bottom: 10px;">🎉 BRAVO ! 🎉</h3>';
+                html += '<p style="font-size: 1.3em; font-weight: bold;">Tu as trouvé les 10 drapeaux !</p>';
+                html += '</div>';
+                
+                html += '<div style="margin-top: 20px; padding: 15px; background: #f7f7f7; border-radius: 10px;">';
+                html += '<h4 style="color: #00838F; margin-bottom: 10px;">📋 Résumé des drapeaux</h4>';
+                
+                // Parcourir les 10 drapeaux dans l'ordre
+                currentGameCountries.forEach(country => {
+                    html += `
+                        <div class="found-item">
+                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                 alt="${country.nom}" 
+                                 class="flag-img"
+                                 onerror="this.style.display='none'">
+                            <span>${country.nom}</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                foundList.innerHTML = html;
             } else {
                 feedback = document.getElementById('inputFeedback');
                 feedback.textContent = `🎉 BRAVO ! Tu as trouvé tous les pays ! 🎉`;
@@ -5317,6 +5345,7 @@
         }
 
         function revealMissingFlags() {
+            console.log('🚩 revealMissingFlags() appelée');
             // Révéler tous les drapeaux non trouvés
             document.querySelectorAll('.flag-item').forEach(flagItem => {
                 const iso2 = flagItem.dataset.iso2;
@@ -5324,6 +5353,42 @@
                     flagItem.classList.add('revealed');
                 }
             });
+            
+            // Afficher la liste des drapeaux sous la grille (comme pour les autres modes)
+            const foundList = document.getElementById('foundList');
+            let html = '<div style="margin-top: 20px; padding: 15px; background: #f7f7f7; border-radius: 10px;">';
+            html += '<h4 style="color: #00838F; margin-bottom: 10px;">📋 Résumé des drapeaux</h4>';
+            html += '<p style="color: #00838F; font-weight: bold; margin-bottom: 10px;">🏳️ Partie abandonnée : ' + foundCountries.length + '/10 drapeaux trouvés</p>';
+            
+            // Parcourir les 10 drapeaux dans l'ordre
+            currentGameCountries.forEach(country => {
+                const isFound = foundCountries.includes(country.iso2);
+                if (isFound) {
+                    html += `
+                        <div class="found-item">
+                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                 alt="${country.nom}" 
+                                 class="flag-img"
+                                 onerror="this.style.display='none'">
+                            <span>${country.nom}</span>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="missed-item">
+                            <img src="./flags/${country.iso2.toLowerCase()}.png" 
+                                 alt="${country.nom}" 
+                                 class="flag-img"
+                                 onerror="this.style.display='none'">
+                            <span>${country.nom}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            foundList.innerHTML = html;
+            console.log('✅ Liste des drapeaux affichée');
         }
 
         function saveCurrentProgress() {
@@ -5505,6 +5570,30 @@
             }
             if (expertValidateBtn) {
                 expertValidateBtn.disabled = false;
+            }
+            
+            // Réactiver les inputs du mode drapeaux
+            document.querySelectorAll('.flag-item input').forEach(input => {
+                input.disabled = false;
+                input.value = '';
+            });
+            
+            // Vider la grille des drapeaux
+            const flagsGrid = document.getElementById('flagsGrid');
+            if (flagsGrid) {
+                flagsGrid.innerHTML = '';
+            }
+            
+            // Vider la liste trouvée
+            const foundList = document.getElementById('foundList');
+            if (foundList) {
+                foundList.innerHTML = '';
+            }
+            
+            // Nettoyer le conteneur de la carte
+            const mapContainer = document.getElementById('mapContainer');
+            if (mapContainer) {
+                mapContainer.innerHTML = '<div class="map-loading">Chargement de la carte...</div>';
             }
             
             // Masquer les feedbacks
