@@ -4462,7 +4462,12 @@
                 document.getElementById('singleInputZone').classList.add('hidden');
                 document.getElementById('expertInputZone').classList.add('hidden');
                 document.getElementById('flagsZone').classList.remove('hidden');
-                document.getElementById('mapContainer').style.display = 'none';
+                
+                // Cacher toute la zone de carte (y compris les contrôles de zoom)
+                const mapWrapper = document.querySelector('.map-wrapper');
+                if (mapWrapper) {
+                    mapWrapper.style.display = 'none';
+                }
                 
                 // Initialiser le mode drapeaux
                 initFlagsMode();
@@ -4470,7 +4475,13 @@
                 document.getElementById('singleInputZone').classList.add('hidden');
                 document.getElementById('expertInputZone').classList.remove('hidden');
                 document.getElementById('flagsZone').classList.add('hidden');
-                document.getElementById('mapContainer').style.display = 'block';
+                
+                // Afficher la zone de carte
+                const mapWrapper = document.querySelector('.map-wrapper');
+                if (mapWrapper) {
+                    mapWrapper.style.display = 'block';
+                }
+                
                 document.getElementById('expertCountryInput').value = '';
                 document.getElementById('expertCapitalInput').value = '';
                 document.getElementById('expertFeedback').classList.remove('show');
@@ -4478,7 +4489,13 @@
                 document.getElementById('expertInputZone').classList.add('hidden');
                 document.getElementById('singleInputZone').classList.remove('hidden');
                 document.getElementById('flagsZone').classList.add('hidden');
-                document.getElementById('mapContainer').style.display = 'block';
+                
+                // Afficher la zone de carte
+                const mapWrapper = document.querySelector('.map-wrapper');
+                if (mapWrapper) {
+                    mapWrapper.style.display = 'block';
+                }
+                
                 document.getElementById('countryInput').placeholder = placeholders[selectedMode];
                 document.getElementById('countryInput').value = '';
                 document.getElementById('inputFeedback').classList.remove('show');
@@ -5346,6 +5363,16 @@
 
         function revealMissingFlags() {
             console.log('🚩 revealMissingFlags() appelée');
+            console.log('currentGameCountries:', currentGameCountries);
+            console.log('foundCountries:', foundCountries);
+            
+            // Vérification de sécurité
+            if (!currentGameCountries || currentGameCountries.length === 0) {
+                console.error('❌ currentGameCountries est vide ou undefined !');
+                alert('⚠️ Erreur : Impossible d\'afficher les drapeaux. Veuillez signaler ce bug.');
+                return;
+            }
+            
             // Révéler tous les drapeaux non trouvés
             document.querySelectorAll('.flag-item').forEach(flagItem => {
                 const iso2 = flagItem.dataset.iso2;
@@ -5594,6 +5621,12 @@
             const mapContainer = document.getElementById('mapContainer');
             if (mapContainer) {
                 mapContainer.innerHTML = '<div class="map-loading">Chargement de la carte...</div>';
+            }
+            
+            // Réafficher la map-wrapper (au cas où elle était cachée en mode drapeaux)
+            const mapWrapper = document.querySelector('.map-wrapper');
+            if (mapWrapper) {
+                mapWrapper.style.display = 'block';
             }
             
             // Masquer les feedbacks
